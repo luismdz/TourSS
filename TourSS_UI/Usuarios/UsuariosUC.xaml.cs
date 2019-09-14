@@ -25,7 +25,7 @@ namespace TourSS_UI
         public UsuariosUC()
         {
             InitializeComponent();
-            dgUsuarios.ItemsSource = da.GetAllUsuarios();
+            dgUsuarios.ItemsSource = da.GetAll<UsuarioModel>("Usuarios");
         }
     }
 }

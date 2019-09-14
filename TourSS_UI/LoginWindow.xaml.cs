@@ -26,15 +26,18 @@ namespace TourSS_UI
         {
             InitializeComponent();
         }
-
-        private void BtnInicioSesion_Click(object sender, RoutedEventArgs e)
+        
+        /// <summary>
+        /// Valida las credenciales del usuario en la UI de Login
+        /// </summary>
+        private void ValidarUsuario()
         {
             string username = txtUsername.Text;
             string password = txtPassword.Password;
 
             UsuarioModel usuario = new UsuarioModel();
             bool esValido;
- 
+
             (usuario, esValido) = da.GetUserByLogin(username, password);
 
             if (esValido && usuario != null)
@@ -52,33 +55,16 @@ namespace TourSS_UI
             }
         }
 
+        private void BtnInicioSesion_Click(object sender, RoutedEventArgs e)
+        {
+            ValidarUsuario();
+        }
 
         private void TxtPassword_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                string username = txtUsername.Text;
-                string password = txtPassword.Password;
-
-                UsuarioModel usuario = new UsuarioModel();
-                bool esValido;
-
-                (usuario, esValido) = da.GetUserByLogin(username, password);
-
-                if (esValido && usuario != null)
-                {
-                    var mw = new MainWindow(usuario);
-                    App.Current.MainWindow = mw;
-                    Close();
-                    mw.Show();
-                }
-                else
-                {
-                    MessageBox.Show("Usuario o Contraseña incorrecta", "USUARIO NO VALIDO", MessageBoxButton.OK);
-                    txtUsername.Text = "";
-                    txtPassword.Password = "";
-                }
-
+                ValidarUsuario();
             }
         }
 

@@ -12,6 +12,6 @@ as begin
 		r.descripcion [Rol]
 	from Usuarios u 
 	left join Roles r on u.rolID = r.rolID
-	inner join credenciales c on u.usuarioID = c.usuarioID
+	inner join Credenciales c on u.usuarioID = c.usuarioID
 	where username = @username
 end

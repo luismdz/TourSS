@@ -70,7 +70,7 @@
     <Build Include="dbo\Tables\Roles.sql" />
     <Build Include="dbo\Tables\Usuarios.sql" />
     <Build Include="dbo\Tables\UsuarioTelefonos.sql" />
-    <Build Include="dbo\Tables\Credenciales.sql" />
+    <Build Include="dbo\Tables\credenciales.sql" />
     <Build Include="dbo\Tables\Servicios.sql" />
     <Build Include="dbo\Tables\Reservaciones.sql" />
     <Build Include="dbo\Tables\ReservacionDetalle.sql" />
