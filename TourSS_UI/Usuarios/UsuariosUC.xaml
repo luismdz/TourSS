@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="TourSS_UI.UsuariosUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:TourSS_UI"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="900">
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="100"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                <TextBlock Text="Usuarios del Sistema" Margin="20 0" FontWeight="DemiBold" FontSize="32"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <StackPanel Orientation="Horizontal">
+                <TextBox materialDesign:HintAssist.Hint="Buscar Usuario" x:Name="txtBuscarServicio" FontSize="14" Width="300" Height="40" 
+                         Margin="20 0"/>
+                <Button Content="Buscar" x:Name="btnBuscar"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <DataGrid x:Name="dgUsuarios" AutoGenerateColumns="false" AlternatingRowBackground="LightGray" 
+                          CanUserAddRows="False" FontSize="12" IsReadOnly="True" ItemsSource="{Binding}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Codigo" Binding="{Binding Path = Codigo}"/>
+                    <DataGridTextColumn Header="Cedula" Binding="{Binding Path = Cedula}"/>
+                    <DataGridTextColumn Header="Nombre Completo" Binding="{Binding Path = Fullname}"/>
+                    <DataGridTextColumn Header="Genero" Binding="{Binding Path = Genero}"/>
+                    <DataGridTextColumn Header="Correo" Binding="{Binding Path = Correo}"/>
+                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Path = Estado}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</UserControl>

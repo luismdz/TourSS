@@ -1,0 +1,283 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using TourSSLibrary;
+
+namespace TourSS_UI
+{
+    /// <summary>
+    /// Interaction logic for ReservacionUC.xaml
+    /// </summary>
+    public partial class ReservacionUC : UserControl
+    {
+        private DataAccess da = new DataAccess();
+
+        IList<ReservacionModel> Items = new List<ReservacionModel>();
+        ReservacionModel reservacion;
+
+        // Listas para pasar como argumentos Tipo "Tabla" al Stored Procedure
+        List<long> serviciosID = new List<long>();
+        List<int> cantidades = new List<int>();
+        List<string> fechas = new List<string>();
+
+        public UsuarioModel Usuario { get; set; }
+
+        public ReservacionUC()
+        {
+            InitializeComponent();
+            
+            FillData();
+        }
+
+        private void FillData()
+        {
+            dateReservacion.SelectedDate = DateTime.Now.Date;
+
+            MainWindow mw = (MainWindow)Application.Current.MainWindow;
+            Usuario = mw.Current;
+            lbUser.Content = $"[{Usuario.Codigo}] {Usuario.Fullname}";
+
+            comboxClienteR.ItemsSource = da.GetAll<ClienteModel>("Clientes");
+            comboxServicioR.ItemsSource = da.GetAll<ServicioModel>("Servicios");
+        }
+
+        //private void ActualizarPrecio()
+        //{
+        //    int qty = (int)qtyPicker.Value;
+        //    decimal precioActualizado = 0;
+
+        //    if (qty >= 1 && comboxServicioR.SelectedItem != null)
+        //    {
+        //        var servicio = (ServicioModel)comboxServicioR.SelectedItem;
+        //        precioActualizado = servicio.Precio * qty;
+        //        //lbPrecio.Content = String.Concat("RD", precioActualizado.ToString("C2"));
+        //    }
+
+        //}
+
+        //private void QtyPicker_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        //{
+        //    ActualizarPrecio();
+        //}
+
+        //private void ComboxServicioR_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        //{
+        //    ActualizarPrecio();
+        //}
+
+        /*
+        private void BtnBuscarClienteR_Click(object sender, RoutedEventArgs e)
+        {
+            ClienteModel clienteBuscado = new ClienteModel();
+            string codigo = txtClienteCodigo.Text;
+            clienteBuscado = da.BuscarCliente(codigo);
+
+            if(clienteBuscado == null)
+            {
+                _ = MessageBox.Show($"Cliente [ {codigo} ] NO EXISTE", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                lbClienteNombre.Content = "NO EXISTE";
+            }
+            else
+            {
+                _ = MessageBox.Show($"Cliente [ {codigo} ] ENCONTRADO", "SUCCESS", MessageBoxButton.OK, MessageBoxImage.Information);
+                lbClienteNombre.Content = clienteBuscado.Fullname;
+            }
+        }
+        */
+
+        private void TxtClienteCodigo_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                ClienteModel clienteBuscado;
+                string codigo = txtClienteCodigo.Text;
+                clienteBuscado = da.BuscarClienteCodigo(codigo);
+
+                if (clienteBuscado == null)
+                {
+                    _ = MessageBox.Show($"Cliente [ {codigo} ] no existe", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                    lbClienteNombre.Content = "NO EXISTE";
+                }
+                else
+                {
+                    _ = MessageBox.Show($"Cliente [ {codigo} ] ENCONTRADO", "SUCCESS", MessageBoxButton.OK, MessageBoxImage.Information);
+                    lbClienteNombre.Content = $"[{clienteBuscado.Codigo}] {clienteBuscado.Fullname}";
+
+                    comboxClienteR.SelectedItem = clienteBuscado;
+                    comboxClienteR.IsEnabled = false;
+                }
+            }
+            comboxClienteR.SelectedIndex = -1;
+        }
+
+        private void ComboxClienteR_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var seleccion = comboxClienteR.SelectedItem as ClienteModel;
+
+            if (seleccion != null)
+            {
+                lbClienteNombre.Content = $"[{seleccion.Codigo}] {seleccion.Fullname}";
+                txtClienteCodigo.Text = seleccion.Codigo;
+            }
+        }
+
+        private void BtnAgregar_Click(object sender, RoutedEventArgs e)
+        {
+            ServicioModel item = (ServicioModel)comboxServicioR.SelectedItem;
+            ClienteModel cliente = (ClienteModel)comboxClienteR.SelectedItem;
+ 
+            //// Crear tabla temporal para agregar como parametro (Agregar a DataAccess)
+            //DataTable servicios = new DataTable();
+            //// Agregar ID del servicio actual a la Tabla Temporal
+            //servicios.Rows.Add(item.ID);
+
+            if (item != null && cliente != null)
+            {
+                int qty = (int)qtyPicker.Value;
+                decimal subtotal = item.Precio * qty;
+                decimal itbis = subtotal * (decimal)0.18;
+                decimal total = subtotal + itbis;
+
+                if(qty >= 1)
+                {
+                    reservacion = new ReservacionModel();
+                    reservacion.Cliente = cliente;
+                    reservacion.Servicio = item;
+                    reservacion.Cantidad = qty;
+                    reservacion.Subtotal = subtotal;
+                    reservacion.Itbis = itbis;
+                    reservacion.Fecha = dateReservacion.SelectedDate.Value.ToShortDateString();
+                    //reservacion.Total = total;
+
+                    Items.Add(reservacion);    
+                    dgReservacion.Items.Add(reservacion);
+                    ActualizarPrecios(reservacion, null);
+
+                    serviciosID.Add(item.ID);
+                    cantidades.Add(qty);
+                    fechas.Add(reservacion.Fecha);
+
+                    //item.CuposDisponibles -= qty;
+                    qtyPicker.Value = 1;
+                    comboxClienteR.IsEnabled = false;
+                    txtClienteCodigo.IsEnabled = false;
+                    comboxServicioR.SelectedIndex = -1;
+                }
+                else
+                    _ = MessageBox.Show("LA CANTIDAD SELECCIONADA NO ES VALIDA", "ERROR", MessageBoxButton.OK);
+            }
+            else
+                _ = MessageBox.Show("DEBE SELECCIONAR EL CLIENTE Y AL MENOS UN PRODUCTO", "ERROR", MessageBoxButton.OK);
+
+        }
+
+        /// <summary>
+        /// Actualiza el GroupBox del detalle de los precios a medida que se agregan servicios en el DataGrid
+        /// </summary>
+        /// <param name="s">Subtotal</param>
+        /// <param name="i">Itbis</param>
+        /// <param name="t">Total</param>
+        //private void ActualizarPrecios(decimal s, decimal i, decimal t)
+        //{
+        //    decimal subtotal = decimal.Parse((string)lbSubtotal.Content,
+        //        NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
+
+        //    decimal itbis = decimal.Parse((string)lbItbis.Content,
+        //        NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
+
+        //    decimal total = decimal.Parse((string)lbTotal.Content,
+        //        NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
+
+        //    subtotal += s;
+        //    itbis += i;
+        //    total += t;
+            
+        //    lbSubtotal.Content = subtotal.ToString("C2");
+        //    lbItbis.Content = itbis.ToString("C2");
+        //    lbTotal.Content = total.ToString("C2");
+        //}
+
+        private void ActualizarPrecios(ReservacionModel i, ReservacionModel d)
+        {
+            decimal subtotal = decimal.Parse((string)lbSubtotal.Content,
+                NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
+
+            decimal itbis = decimal.Parse((string)lbItbis.Content,
+                NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
+
+            decimal total = decimal.Parse((string)lbTotal.Content,
+                NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
+
+            if (i != null)
+            {
+                subtotal += i.Subtotal;
+                itbis += i.Itbis;
+                total += i.Total;
+            }
+            else
+            {
+                subtotal -= d.Subtotal;
+                itbis -= d.Itbis;
+                total -= d.Total;
+            }
+            
+            lbSubtotal.Content = subtotal.ToString("C2");
+            lbItbis.Content = itbis.ToString("C2");
+            lbTotal.Content = total.ToString("C2");
+        }
+
+
+        private void BtnReservar_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void BtnLimpiarGrid_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show("Seguro que desea limpiar todos los campos?", "BORRAR TODO", MessageBoxButton.YesNo);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                dgReservacion.Items.Clear();
+                dgReservacion.Items.Refresh();
+                comboxServicioR.SelectedIndex = -1;
+                comboxClienteR.SelectedIndex = -1;
+                txtClienteCodigo.Text = "";
+                lbClienteNombre.Content = "";
+
+                lbSubtotal.Content = "$0.0";
+                lbItbis.Content = "$0.0";
+                lbTotal.Content = "$0.0";
+
+                comboxClienteR.IsEnabled = true;
+                txtClienteCodigo.IsEnabled = true;
+            }
+            
+        }
+
+        private void DgBtnBorrar_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = dgReservacion.SelectedItem as ReservacionModel;
+            ActualizarPrecios(null, selected);
+            dgReservacion.Items.Remove(selected);
+        }
+
+        private void QtyPicker_GotFocus(object sender, RoutedEventArgs e)
+        {
+            var item = comboxServicioR.SelectedItem as ServicioModel;
+
+            if (item != null)
+            {
+                int max = item.CuposDisponibles;
+                qtyPicker.Maximum = max;
+            }
+           
+        }
+    }
+}
