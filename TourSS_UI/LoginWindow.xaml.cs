@@ -34,25 +34,8 @@ namespace TourSS_UI
 
             UsuarioModel usuario = new UsuarioModel();
             bool esValido;
-            //usuario = da.GetUsuarioByLogin(username, password);
-
-            //if (da.Validar(username, password))
-            //{
-            //    var mw = new MainWindow(usuario);
-            //    App.Current.MainWindow = mw;
-            //    Close();
-            //    mw.Show();
-            //    //mw.lbUser.Content = username;
-            //    //mw.lbUserName.Content = $"{usuario.Fullname}";
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Usuario o Contraseña incorrecta", "USUARIO NO VALIDO", MessageBoxButton.OK);
-            //    txtUsername.Text = "";
-            //    txtPassword.Password = "";
-            //}
-
-            (usuario, esValido) = da.GetUsuarioByLogin(username, password);
+ 
+            (usuario, esValido) = da.GetUserByLogin(username, password);
 
             if (esValido && usuario != null)
             {
@@ -60,8 +43,6 @@ namespace TourSS_UI
                 App.Current.MainWindow = mw;
                 Close();
                 mw.Show();
-                //mw.lbUser.Content = username;
-                //mw.lbUserName.Content = $"{usuario.Fullname}";
             }
             else
             {
@@ -82,7 +63,7 @@ namespace TourSS_UI
                 UsuarioModel usuario = new UsuarioModel();
                 bool esValido;
 
-                (usuario, esValido) = da.GetUsuarioByLogin(username, password);
+                (usuario, esValido) = da.GetUserByLogin(username, password);
 
                 if (esValido && usuario != null)
                 {
@@ -90,8 +71,6 @@ namespace TourSS_UI
                     App.Current.MainWindow = mw;
                     Close();
                     mw.Show();
-                    //mw.lbUser.Content = username;
-                    //mw.lbUserName.Content = $"{usuario.Fullname}";
                 }
                 else
                 {

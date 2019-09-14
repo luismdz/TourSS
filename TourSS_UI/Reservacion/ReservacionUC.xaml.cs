@@ -95,11 +95,11 @@ namespace TourSS_UI
         {
             if (e.Key == Key.Enter)
             {
-                ClienteModel clienteBuscado;
+                var clientesBuscados = new List<ClienteModel>();
                 string codigo = txtClienteCodigo.Text;
-                clienteBuscado = da.BuscarClienteCodigo(codigo);
+                clientesBuscados = da.BuscarClientes(new string[] { codigo, null, null });
 
-                if (clienteBuscado == null)
+                if (clientesBuscados == null)
                 {
                     _ = MessageBox.Show($"Cliente [ {codigo} ] no existe", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                     lbClienteNombre.Content = "NO EXISTE";
@@ -107,9 +107,9 @@ namespace TourSS_UI
                 else
                 {
                     _ = MessageBox.Show($"Cliente [ {codigo} ] ENCONTRADO", "SUCCESS", MessageBoxButton.OK, MessageBoxImage.Information);
-                    lbClienteNombre.Content = $"[{clienteBuscado.Codigo}] {clienteBuscado.Fullname}";
+                    lbClienteNombre.Content = $"[{clientesBuscados[0].Codigo}] {clientesBuscados[0].Fullname}";
 
-                    comboxClienteR.SelectedItem = clienteBuscado;
+                    comboxClienteR.SelectedItem = clientesBuscados;
                     comboxClienteR.IsEnabled = false;
                 }
             }
@@ -178,31 +178,10 @@ namespace TourSS_UI
         }
 
         /// <summary>
-        /// Actualiza el GroupBox del detalle de los precios a medida que se agregan servicios en el DataGrid
+        /// Actualiza el GroupBox del detalle de los precios a medida que se agregan (i) o eliminan (d) servicios en el DataGrid
         /// </summary>
-        /// <param name="s">Subtotal</param>
-        /// <param name="i">Itbis</param>
-        /// <param name="t">Total</param>
-        //private void ActualizarPrecios(decimal s, decimal i, decimal t)
-        //{
-        //    decimal subtotal = decimal.Parse((string)lbSubtotal.Content,
-        //        NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
-
-        //    decimal itbis = decimal.Parse((string)lbItbis.Content,
-        //        NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
-
-        //    decimal total = decimal.Parse((string)lbTotal.Content,
-        //        NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
-
-        //    subtotal += s;
-        //    itbis += i;
-        //    total += t;
-            
-        //    lbSubtotal.Content = subtotal.ToString("C2");
-        //    lbItbis.Content = itbis.ToString("C2");
-        //    lbTotal.Content = total.ToString("C2");
-        //}
-
+        /// <param name="i"></param>
+        /// <param name="d"></param>
         private void ActualizarPrecios(ReservacionModel i, ReservacionModel d)
         {
             decimal subtotal = decimal.Parse((string)lbSubtotal.Content,
@@ -238,6 +217,11 @@ namespace TourSS_UI
             
         }
 
+        /// <summary>
+        /// Limpia los datos del datagrid y groupbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnLimpiarGrid_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show("Seguro que desea limpiar todos los campos?", "BORRAR TODO", MessageBoxButton.YesNo);
@@ -261,6 +245,9 @@ namespace TourSS_UI
             
         }
 
+        /// <summary>
+        /// Elimina registros del datagrid
+        /// </summary>
         private void DgBtnBorrar_Click(object sender, RoutedEventArgs e)
         {
             var selected = dgReservacion.SelectedItem as ReservacionModel;
@@ -268,6 +255,11 @@ namespace TourSS_UI
             dgReservacion.Items.Remove(selected);
         }
 
+        /// <summary>
+        /// Establece la cantidad maxima de unidades de servicios quedan disponibles (cupos disponibles)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void QtyPicker_GotFocus(object sender, RoutedEventArgs e)
         {
             var item = comboxServicioR.SelectedItem as ServicioModel;

@@ -12,9 +12,8 @@ namespace TourSS_UI
     public partial class ClientesUC : UserControl
     {
         private DataAccess da = new DataAccess();
-        PrintDialog print = new PrintDialog();
+        //PrintDialog print = new PrintDialog();
       
-
         public IList<ClienteModel> Clientes { get; set; }
         
         public ClientesUC()
@@ -70,11 +69,6 @@ namespace TourSS_UI
             else
             {
                 string nombre = txtBuscarCliente.Text;
-
-                //clientesBuscados = da.BuscarClientesNombre(nombre);
-
-                //if(clientesBuscados != null)
-                //    ClientesDataGrid.ItemsSource = clientesBuscados;
                 clientesBuscados = da.BuscarClientes(new string[] { null, nombre, null });
 
                 if (clientesBuscados != null)
@@ -90,13 +84,11 @@ namespace TourSS_UI
             {
                 if (!txtBuscarCedula.IsMaskCompleted)
                 {
-                    //ClientesDataGrid.ItemsSource = da.GetAllClientes();
                     ClientesDataGrid.ItemsSource = da.GetAll<ClienteModel>("Clientes");
                 }
                 else
                 {
                     var clientesBuscados = new List<ClienteModel>();
-
                     string cedula = txtBuscarCedula.Text;
                     clientesBuscados = da.BuscarClientes(new string[] { null, null, cedula });
 
@@ -104,13 +96,16 @@ namespace TourSS_UI
                     {
                         ClientesDataGrid.ItemsSource = clientesBuscados;
                         txtBuscarCedula.Text = "";
-                    }
-                        
+                    }    
                 }
-                
             }
         }
 
+        /// <summary>
+        /// Permite copiar de celda
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ClientesDataGrid_CopyingRowClipboardContent(object sender, DataGridRowClipboardEventArgs e)
         {
             var currenCell = e.ClipboardRowContent[ClientesDataGrid.CurrentCell.Column.DisplayIndex];
@@ -118,23 +113,6 @@ namespace TourSS_UI
             e.ClipboardRowContent.Add(currenCell);
         }
 
-          
-
-        //private void TxtBuscarCedula_TextChanged(object sender, TextChangedEventArgs e)
-        //{
-        //    string txt = txtBuscarCedula.Text;
-        //    if (txt.Length == 3)
-        //    {
-        //        txtBuscarCedula.Text = txt.Insert(3, "-");
-        //        txtBuscarCedula.CaretIndex = txtBuscarCedula.Text.Length;
-        //    }
-
-        //    if (txt.Length == 12)
-        //    {
-        //        txtBuscarCedula.Text = txt.Insert(11, "-");
-        //        txtBuscarCedula.CaretIndex = txtBuscarCedula.Text.Length;
-        //    }
-        //}
 
         //private void BtnPrint_Click(object sender, RoutedEventArgs e)
         //{

@@ -23,9 +23,9 @@ namespace TourSSLibrary
         public decimal Itbis { get; set; }
         public decimal Total { get => Subtotal + Itbis; }
 
-        public string SubtotalFormatted { get => Subtotal.ToString("C2"); }
-        public string ItbisFormatted { get => Itbis.ToString("C2"); }
-        public string TotalFormatted { get => Total.ToString("C2"); }
+        //public string SubtotalFormatted { get => Subtotal.ToString("C2"); }
+        //public string ItbisFormatted { get => Itbis.ToString("C2"); }
+        //public string TotalFormatted { get => Total.ToString("C2"); }
 
         public ReservacionModel()
         {
