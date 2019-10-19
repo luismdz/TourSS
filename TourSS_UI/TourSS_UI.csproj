@@ -113,6 +113,12 @@
     <Compile Include="Clientes\AgregarClienteUC.xaml.cs">
       <DependentUpon>AgregarClienteUC.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Clientes\ClienteDetalle.xaml.cs">
+      <DependentUpon>ClienteDetalle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Reportes\ReportesUC.xaml.cs">
+      <DependentUpon>ReportesUC.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Servicios\CatalogoUC.xaml.cs">
       <DependentUpon>CatalogoUC.xaml</DependentUpon>
     </Compile>
@@ -133,6 +139,14 @@
       <DependentUpon>UsuariosUC.xaml</DependentUpon>
     </Compile>
     <Page Include="Clientes\AgregarClienteUC.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Clientes\ClienteDetalle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Reportes\ReportesUC.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -258,6 +272,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\add-customer.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\report.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\diagram.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

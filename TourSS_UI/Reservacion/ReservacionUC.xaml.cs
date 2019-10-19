@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -21,10 +22,14 @@ namespace TourSS_UI
         IList<ReservacionModel> Items = new List<ReservacionModel>();
         ReservacionModel reservacion;
 
-        // Listas para pasar como argumentos Tipo "Tabla" al Stored Procedure
-        List<long> serviciosID = new List<long>();
-        List<int> cantidades = new List<int>();
-        List<string> fechas = new List<string>();
+        // Crear tabla temporal para agregar como parametro (Agregar a DataAccess)
+        DataTable servicios = new DataTable("List");
+        ClienteModel reservacionCliente;
+
+        //// Listas para pasar como argumentos Tipo "Tabla" al Stored Procedure
+        //List<long> serviciosID = new List<long>();
+        //List<int> cantidades = new List<int>();
+        //List<string> fechas = new List<string>();
 
         public UsuarioModel Usuario { get; set; }
 
@@ -45,73 +50,42 @@ namespace TourSS_UI
 
             comboxClienteR.ItemsSource = da.GetAll<ClienteModel>("Clientes");
             comboxServicioR.ItemsSource = da.GetAll<ServicioModel>("Servicios");
+
+            servicios.Columns.Add("servicioID", typeof(long));
+            servicios.Columns.Add("cantidad", typeof(int));
+
         }
 
-        //private void ActualizarPrecio()
-        //{
-        //    int qty = (int)qtyPicker.Value;
-        //    decimal precioActualizado = 0;
+        private static readonly Regex regex = new Regex("[^0-9]");
 
-        //    if (qty >= 1 && comboxServicioR.SelectedItem != null)
-        //    {
-        //        var servicio = (ServicioModel)comboxServicioR.SelectedItem;
-        //        precioActualizado = servicio.Precio * qty;
-        //        //lbPrecio.Content = String.Concat("RD", precioActualizado.ToString("C2"));
-        //    }
-
-        //}
-
-        //private void QtyPicker_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        //{
-        //    ActualizarPrecio();
-        //}
-
-        //private void ComboxServicioR_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        //{
-        //    ActualizarPrecio();
-        //}
-
-        /*
-        private void BtnBuscarClienteR_Click(object sender, RoutedEventArgs e)
-        {
-            ClienteModel clienteBuscado = new ClienteModel();
-            string codigo = txtClienteCodigo.Text;
-            clienteBuscado = da.BuscarCliente(codigo);
-
-            if(clienteBuscado == null)
-            {
-                _ = MessageBox.Show($"Cliente [ {codigo} ] NO EXISTE", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                lbClienteNombre.Content = "NO EXISTE";
-            }
-            else
-            {
-                _ = MessageBox.Show($"Cliente [ {codigo} ] ENCONTRADO", "SUCCESS", MessageBoxButton.OK, MessageBoxImage.Information);
-                lbClienteNombre.Content = clienteBuscado.Fullname;
-            }
-        }
-        */
-
+        private static bool IsTextAllowed(string text) => !regex.IsMatch(text);
+        
         private void TxtClienteCodigo_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
-                var clientesBuscados = new List<ClienteModel>();
-                string codigo = txtClienteCodigo.Text;
-                clientesBuscados = da.BuscarClientes(new string[] { codigo, null, null });
-
-                if (clientesBuscados == null)
+                string codigo = "TC-" + txtClienteCodigo.Text;
+                if (txtClienteCodigo.Text != "")
                 {
-                    _ = MessageBox.Show($"Cliente [ {codigo} ] no existe", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                    lbClienteNombre.Content = "NO EXISTE";
+                    var clientesBuscados = new List<ClienteModel>();
+                    clientesBuscados = da.BuscarClientes(new string[] { codigo, null, null });
+
+                    if (clientesBuscados == null)
+                    {
+                        _ = MessageBox.Show($"Cliente [ {codigo} ] no existe", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                        lbClienteNombre.Content = "NO EXISTE";
+                    }
+                    else
+                    {
+                        _ = MessageBox.Show($"Cliente [ {codigo} ] ENCONTRADO", "SUCCESS", MessageBoxButton.OK, MessageBoxImage.Information);
+                        lbClienteNombre.Content = $"[{clientesBuscados[0].Codigo}] {clientesBuscados[0].Fullname}";
+
+                        //comboxClienteR.SelectedIndex = comboxClienteR.Items.Filter()
+                        comboxClienteR.IsEnabled = false;
+                    }
                 }
                 else
-                {
-                    _ = MessageBox.Show($"Cliente [ {codigo} ] ENCONTRADO", "SUCCESS", MessageBoxButton.OK, MessageBoxImage.Information);
-                    lbClienteNombre.Content = $"[{clientesBuscados[0].Codigo}] {clientesBuscados[0].Fullname}";
-
-                    comboxClienteR.SelectedItem = clientesBuscados;
-                    comboxClienteR.IsEnabled = false;
-                }
+                    _ = MessageBox.Show("INGRESE CODIGO DE CLIENTE", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             comboxClienteR.SelectedIndex = -1;
         }
@@ -131,11 +105,6 @@ namespace TourSS_UI
         {
             ServicioModel item = (ServicioModel)comboxServicioR.SelectedItem;
             ClienteModel cliente = (ClienteModel)comboxClienteR.SelectedItem;
- 
-            //// Crear tabla temporal para agregar como parametro (Agregar a DataAccess)
-            //DataTable servicios = new DataTable();
-            //// Agregar ID del servicio actual a la Tabla Temporal
-            //servicios.Rows.Add(item.ID);
 
             if (item != null && cliente != null)
             {
@@ -147,21 +116,26 @@ namespace TourSS_UI
                 if(qty >= 1)
                 {
                     reservacion = new ReservacionModel();
+                    reservacionCliente = new ClienteModel();
+
                     reservacion.Cliente = cliente;
                     reservacion.Servicio = item;
                     reservacion.Cantidad = qty;
                     reservacion.Subtotal = subtotal;
                     reservacion.Itbis = itbis;
-                    reservacion.Fecha = dateReservacion.SelectedDate.Value.ToShortDateString();
+                    reservacion.Fecha = dateReservacion.SelectedDate.Value.Date;
                     //reservacion.Total = total;
 
                     Items.Add(reservacion);    
                     dgReservacion.Items.Add(reservacion);
                     ActualizarPrecios(reservacion, null);
 
-                    serviciosID.Add(item.ID);
-                    cantidades.Add(qty);
-                    fechas.Add(reservacion.Fecha);
+                    //serviciosID.Add(item.ID);
+                    //cantidades.Add(qty);
+                    //fechas.Add(reservacion.Fecha);
+
+                    // Agregar ID del servicio actual a la Tabla Temporal
+                    servicios.Rows.Add(item.ID, qtyPicker.Value);
 
                     //item.CuposDisponibles -= qty;
                     qtyPicker.Value = 1;
@@ -211,10 +185,47 @@ namespace TourSS_UI
             lbTotal.Content = total.ToString("C2");
         }
 
+        private bool esValida() =>
+            Usuario != null && reservacion != null && Items != null &&
+            reservacion.Cantidad < reservacion.Servicio.CuposDisponibles ? true : false; 
+       
 
         private void BtnReservar_Click(object sender, RoutedEventArgs e)
         {
-            
+            if(esValida())
+            {
+                var usuarioID = Usuario.ID;
+                var clienteID = reservacion.Cliente.ID;
+
+                var output = da.Reservar(Items, clienteID, usuarioID);
+
+                if (Convert.ToInt64(output) > 1000)
+                {
+                    MessageBox.Show($"RESERVACION #{output} CREADA.");
+                    ClearDataGrid();
+                }
+                else
+                    MessageBox.Show($"ERROR. NO SE PUDO CREAR RESERVACION", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            else
+                MessageBox.Show($"ERROR. ALGUNOS DATOS ESTAN INCORRECTOS, FAVOR VALIDAR!", "DATOS NO VALIDOS", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private void ClearDataGrid()
+        {
+            dgReservacion.Items.Clear();
+            dgReservacion.Items.Refresh();
+            comboxServicioR.SelectedIndex = -1;
+            comboxClienteR.SelectedIndex = -1;
+            txtClienteCodigo.Text = "";
+            lbClienteNombre.Content = "";
+
+            lbSubtotal.Content = "$0.0";
+            lbItbis.Content = "$0.0";
+            lbTotal.Content = "$0.0";
+
+            comboxClienteR.IsEnabled = true;
+            txtClienteCodigo.IsEnabled = true;
         }
 
         /// <summary>
@@ -228,19 +239,7 @@ namespace TourSS_UI
 
             if (result == MessageBoxResult.Yes)
             {
-                dgReservacion.Items.Clear();
-                dgReservacion.Items.Refresh();
-                comboxServicioR.SelectedIndex = -1;
-                comboxClienteR.SelectedIndex = -1;
-                txtClienteCodigo.Text = "";
-                lbClienteNombre.Content = "";
-
-                lbSubtotal.Content = "$0.0";
-                lbItbis.Content = "$0.0";
-                lbTotal.Content = "$0.0";
-
-                comboxClienteR.IsEnabled = true;
-                txtClienteCodigo.IsEnabled = true;
+                ClearDataGrid();
             }
             
         }
@@ -270,6 +269,11 @@ namespace TourSS_UI
                 qtyPicker.Maximum = max;
             }
            
+        }
+
+        private void TxtClienteCodigo_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !IsTextAllowed(e.Text);
         }
     }
 }

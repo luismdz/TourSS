@@ -48,6 +48,7 @@
     <Compile Include="Models\ClienteModel.cs" />
     <Compile Include="Models\ComentarioModel.cs" />
     <Compile Include="Models\Credencial.cs" />
+    <Compile Include="Models\UbicacionModel.cs" />
     <Compile Include="Models\UsuarioModel.cs" />
     <Compile Include="Models\PagosModel.cs" />
     <Compile Include="Models\ReporteModel.cs" />

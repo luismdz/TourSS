@@ -65,12 +65,16 @@ namespace TourSSLibrary
 
                     clientes = db.Query<ClienteModel>("dbo.usp_BuscarClientes @codigo, @nombre, @cedula", p).ToList();
 
-                    foreach (var cliente in clientes)
+                    if (clientes.Count != 0)
                     {
-                        var id = new DynamicParameters();
-                        id.Add("@id", cliente.ID);
-                        cliente.Telefonos = db.Query<string>("dbo.usp_TelefonosCliente_Get @id", id).ToList();
+                        foreach (var cliente in clientes)
+                        {
+                            var id = new DynamicParameters();
+                            id.Add("@id", cliente.ID);
+                            cliente.Telefonos = db.Query<string>("dbo.usp_TelefonosCliente_Get @id", id).ToList();
+                        }
                     }
+                    else return null;
                 }
             }
             catch (Exception)
@@ -78,6 +82,82 @@ namespace TourSSLibrary
                 return null;
             }
             return clientes;
+        }
+
+        public List<ServicioModel> BuscarServicios(int? ubicacionID, int? servicioID, DateTime? fechaDesde, DateTime? fechaHasta)
+        {
+            try
+            {
+                List<ServicioModel> servicios = new List<ServicioModel>();
+                using (IDbConnection db = new SqlConnection(ConnectionString(database)))
+                {
+                    var p = new DynamicParameters();
+                    p.Add("@paisID", ubicacionID);
+                    p.Add("@fechaDesde", fechaDesde);
+                    p.Add("@fechaHasta", fechaHasta);
+                    p.Add("ID", servicioID);
+
+                    servicios = db.Query<ServicioModel>("dbo.usp_BuscarServicios @paisID, @fechaDesde, @fechaHasta, @ID", p).ToList();
+                }
+                return servicios;
+            }
+            catch(Exception)
+            {
+                return null;
+            }
+        }
+
+        public string Reservar(IList<ReservacionModel> items, long clienteID, long usuarioID)
+        {
+            try
+            {
+                using (var conn = new SqlConnection(ConnectionString(database)))
+                {
+                    //var p = new DynamicParameters();
+                    //p.Add("@usuarioID", usuarioID);
+                    //p.Add("@clienteID", clienteID);
+                    //p.Add("@servicios", servicios.AsTableValuedParameter("List"));
+                    //p.Add("@fecha", fecha);
+
+                    //var affectedRows = conn.Execute("Test", p, commandType: CommandType.StoredProcedure);
+                    //return affectedRows.ToString();
+                    conn.Open();
+
+                    // Begin the transaction
+                    using(var transaction = conn.BeginTransaction())
+                    {
+                        //Crea la reservacion
+                        var paramMaster = new DynamicParameters();
+                        paramMaster.Add("usuarioID", usuarioID);
+                        paramMaster.Add("clienteID", clienteID);
+
+                        var affectedRows = conn.Execute("usp_SaveReservacion", paramMaster, commandType: CommandType.StoredProcedure, transaction: transaction);
+
+                        //Obtener ultimo ID registrado en Reservaciones
+                        long newID = Convert.ToInt64(conn.ExecuteScalar<object>("SELECT @@IDENTITY", null, transaction: transaction));
+
+                        //Iterar elementos de la lista de Reservaciones
+                        foreach(var item in items)
+                        {
+                            var paramDetails = new DynamicParameters();
+                            paramDetails.Add("@reservacionID", newID);
+                            paramDetails.Add("@servicioID", item.Servicio.ID);
+                            paramDetails.Add("@cantidad", item.Cantidad);
+
+                            // Insertar linea en ReservacionDetalle
+                            affectedRows = conn.Execute("usp_SetReservacionDetalle", paramDetails, commandType: CommandType.StoredProcedure, transaction: transaction);
+                        }
+
+                        // Commit tran
+                        transaction.Commit();
+                        return newID.ToString();
+                    }
+                }
+            }
+            catch (SqlException e)
+            {    
+                return e.Message;
+            }
         }
 
 

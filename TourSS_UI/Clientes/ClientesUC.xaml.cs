@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using TourSS_UI.Clientes;
 using TourSSLibrary;
 
 namespace TourSS_UI
@@ -111,6 +112,25 @@ namespace TourSS_UI
             var currenCell = e.ClipboardRowContent[ClientesDataGrid.CurrentCell.Column.DisplayIndex];
             e.ClipboardRowContent.Clear();
             e.ClipboardRowContent.Add(currenCell);
+        }
+
+        private void Detalle_Click(object sender, RoutedEventArgs e)
+        {
+            var detalle = new ClienteDetalle();
+            detalle.ShowDialog();
+            //testPop.IsOpen = true;
+        }
+
+        private void DgBtnDetalle_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = ClientesDataGrid.SelectedItem as ClienteModel;
+            var detalle = new ClienteDetalle(selected);
+            detalle.ShowDialog();
+        }
+
+        private void DgBtnEditar_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
 

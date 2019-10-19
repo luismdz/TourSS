@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TourSS_UI"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        mc:Ignorable="d" Height="600" Width="1200" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" WindowStyle="None">
+        mc:Ignorable="d" Height="600" Width="1200" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" WindowStyle="None" MouseDown="Dashboard_MouseDown">
     <Grid Background="White">
         
-        <StackPanel VerticalAlignment="Top">
+        <StackPanel VerticalAlignment="Top" >
             <Grid Background="#FF0069C0" Height="10" />
             <StackPanel Orientation="Horizontal" Margin="200 0 0 0">
                 <Image Source="Images/icon_TourSS11.jpg" Width="40" Height="40" HorizontalAlignment="Center" Margin="300 0 0 0"/>
@@ -42,11 +42,11 @@
                     
                 </StackPanel>
             </Grid>
-            <materialDesign:TransitioningContent x:Name="TransitioningContentSlide" OpeningEffect="{materialDesign:TransitionEffect slideInFromLeft, Duration=0:0:0.2}"
-                                                 Grid.Row="1">
-                <Grid x:Name="GridCursor" Margin="0 0 0 0" Background="#FF0069C0" Width="5" HorizontalAlignment="Left" Height="60" VerticalAlignment="Top"/>
-            </materialDesign:TransitioningContent>
-            <ListView Grid.Row="1" x:Name="ListViewMenu" Margin="0 0 0 50" Foreground="LightGray" SelectionChanged="ListViewMenu_SelectionChanged">
+            <!--<materialDesign:TransitioningContent x:Name="TransitioningContentSlide" OpeningEffect="{materialDesign:TransitionEffect slideInFromLeft, Duration=0:0:0.2}">
+                <Grid x:Name="GridCursor" Margin="0 100 0 0" Background="#FF0069C0" Width="5" HorizontalAlignment="Left" Height="60" VerticalAlignment="Top" Grid.Row="1"/>
+            </materialDesign:TransitioningContent>-->
+            <ListView Grid.Row="1" x:Name="ListViewMenu" Margin="0 0 0 50" Foreground="LightGray" SelectionChanged="ListViewMenu_SelectionChanged"
+                      Cursor="Hand">
                 <ListViewItem Height="60">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Home" Width="30" Height="30" VerticalAlignment="Center" Margin="5"/>

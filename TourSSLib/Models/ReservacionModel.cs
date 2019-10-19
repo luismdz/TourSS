@@ -8,7 +8,7 @@ namespace TourSSLibrary
     {
         public UsuarioModel Usuario { get; set; }
         public ClienteModel Cliente { get; set; }
-        public string Fecha { get; set; }
+        public DateTime Fecha { get; set; }
 
         /// <summary>
         /// Lista de Servicios en la Reservacion
@@ -23,9 +23,7 @@ namespace TourSSLibrary
         public decimal Itbis { get; set; }
         public decimal Total { get => Subtotal + Itbis; }
 
-        //public string SubtotalFormatted { get => Subtotal.ToString("C2"); }
-        //public string ItbisFormatted { get => Itbis.ToString("C2"); }
-        //public string TotalFormatted { get => Total.ToString("C2"); }
+        public string SubtotalFormatted { get => Subtotal.ToString("C2"); }
 
         public ReservacionModel()
         {
