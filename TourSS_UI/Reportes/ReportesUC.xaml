@@ -64,7 +64,7 @@
 
         </Grid>
         <DataGrid Grid.Row="2" Name="dgReportes" ItemsSource="{Binding}" CanUserSortColumns="True" CanUserAddRows="False"
-                  AutoGenerateColumns="False" materialDesign:DataGridAssist.ColumnHeaderPadding="5" Visibility="Visible">
+                  AutoGenerateColumns="False" materialDesign:DataGridAssist.ColumnHeaderPadding="5" Visibility="Visible" IsReadOnly="True">
             <DataGrid.Columns>
                 <materialDesign:MaterialDataGridTextColumn Header="# Reservacion" Binding="{Binding Path=ReservacionID}"/>
                 <DataGridTextColumn Header="Cod. Cliente" Binding="{Binding Path=Cliente.Codigo}"/>
