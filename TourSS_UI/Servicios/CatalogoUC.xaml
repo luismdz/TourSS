@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TourSS_UI"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" 
              Height="500" Width="970"
              FontFamily="Roboto">
@@ -33,9 +34,9 @@
                          Margin="20 0"/>
                 <Button Content="Buscar" x:Name="btnBuscar"/>-->
                 <ComboBox x:Name="comboxUbicacion" materialDesign:HintAssist.Hint="Ubicacion" Margin="20 0" ItemsSource="{Binding}" SelectedValuePath="ID"
-                          DisplayMemberPath="Nombre" SelectionChanged="comboxUbicacion_SelectionChanged" FontSize="14"/>
+                          DisplayMemberPath="Nombre" SelectionChanged="comboxUbicacion_SelectionChanged" FontSize="14" Width="120"/>
                 <DatePicker Width="100" x:Name="DatePickerFrom" Height="30" 
-                            materialDesign:HintAssist.Hint="Desde" Margin="30 0" FontSize="14"/>
+                            materialDesign:HintAssist.Hint="Desde" Margin="20" FontSize="14"/>
                 <DatePicker Width="100" x:Name="DatePickerTo" Height="30" FontSize="14" 
                             materialDesign:HintAssist.Hint="Hasta"/>
                 <Button Margin="30 0 20 0" Padding="10 5" x:Name="btnFilter" Click="btnFilter_Click">
@@ -47,12 +48,12 @@
                         <materialDesign:PackIcon Kind="Clear" Margin="5 0" VerticalAlignment="Center" Width="20" Height="20"/>
                     </StackPanel>
                 </Button>
-                <Button Margin="30 0 20 0" Padding="10 5" x:Name="btnAdd" Click="btnFilter_Click">
+                <Button Margin="30 0 20 0" Padding="10 5" x:Name="btnAdd" Click="btnAdd_Click">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <materialDesign:PackIcon Kind="Add" Margin="0 0 5 0"/>
                         <TextBlock Text="AGREGAR"/>
                     </StackPanel>
-                   
+
                 </Button>
             </StackPanel>
         </Grid>
@@ -64,7 +65,7 @@
                 <DataGrid.Columns>
                     <!--<DataGridTextColumn Header="ID" Binding="{Binding Path = ID}"/>-->
                     <DataGridTextColumn Header="Descripcion" Binding="{Binding Path = Descripcion}"/>
-                    <DataGridTextColumn Header="Precio" Binding="{Binding Path = PrecioFormatted}"/>
+                    <DataGridTextColumn Header="Precio (RD$)" Binding="{Binding Path = Precio, StringFormat={}{0:C2}}"/>
                     <DataGridTextColumn Header="Cupos" Binding="{Binding Path = CuposDisponibles}"/>
                     <DataGridTextColumn Header="Fecha Disponible" Binding="{Binding Path = RangoFecha}"/>
                     <DataGridTemplateColumn Header="Detalles">
@@ -82,7 +83,7 @@
             </DataGrid>
         </Grid>
 
-        <GroupBox Margin="20,32,0,0" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2">
+        <GroupBox Margin="20,32,0,0" Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" x:Name="groupBox">
             <GroupBox.Header>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                     <materialDesign:PackIcon Kind="Information" Foreground="#fff" Margin="10 0"/>
@@ -101,44 +102,63 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Grid.Row="0">
-                    <TextBlock IsEnabled="False" x:Name="txtDescripcion" Text="Descripcion" FontSize="14" Margin="5 0"/>
-                    <Label Content="Descripcion del Servicio" FontWeight="Black"/>
+                    <!--<TextBlock IsEnabled="False" x:Name="txtDescripcion" Text="Descripcion" FontSize="14" Margin="5 0"/>-->
+                    <Label  FontSize="14" x:Name="lbDescripcion" />
+                    <TextBox  FontSize="14" x:Name="txtDescripcion" Visibility="Collapsed"/>
+                    <Label Content="Descripcion del Servicio" FontWeight="Black" Padding="5 0"/>
                 </StackPanel>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0 5 0 0">
                     <StackPanel>
-                        <TextBlock IsEnabled="False" x:Name="txtPrecio" Text="PRECIO" FontSize="14" Margin="5 0" Width="120"/>
-                        <Label Content="Precio" FontWeight="Black"/>
+                        <!--<TextBlock IsEnabled="False" x:Name="txtPrecio" Text="PRECIO" FontSize="14" Margin="5 0" Width="120"/>-->
+                        <Label x:Name="lbPrecio"  FontSize="14" />
+                        <TextBox Text= "" FontSize="14" x:Name="txtPrecio" Visibility="Collapsed" Width="100" PreviewTextInput="txtPrecio_PreviewTextInput"/>
+                        <Label Content="Precio" FontWeight="Black" Padding="5 0" />
                     </StackPanel>
-                    <StackPanel Margin="10 0 0 0" >
-                        <TextBlock IsEnabled="False" x:Name="txtCupos" Text="CUPOS" FontSize="14" Margin="5 0"/>
-                        <Label Content="Cupos disponibles" FontWeight="Black"/>
+                    <StackPanel Margin="30 0 0 0">
+                        <!--<TextBlock IsEnabled="False" x:Name="txtCupos" Text="CUPOS" FontSize="14" Margin="5 0"/>-->
+                        <Label x:Name="lbCupos" FontSize="14" HorizontalAlignment="Center"/>
+                        <xctk:IntegerUpDown x:Name="qtyPicker" FontSize="12"  AllowTextInput="False" Value="1"
+                                        Height="25" HorizontalAlignment="Center" Margin="0 5" Minimum="1" Visibility="Collapsed"/>
+                        <Label Content="Cupos disponibles" FontWeight="Black" Padding="5 0"/>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Margin="0 0 0 0">
                     <!--<TextBlock IsEnabled="False" x:Name="comboxUbicacion" Text="Descripcion" FontSize="14" Margin="5 0"/>-->
-                    <ComboBox x:Name="cbxDetallePais" materialDesign:HintAssist.Hint="Ubicacion" FontSize="14" Margin="5 0" IsEnabled="False"/>
+                    <!--<TextBlock IsEnabled="False" x:Name="comboxUbicacion" Text="Descripcion" FontSize="14" Margin="5 0"/>-->
+                    <ComboBox x:Name="cbxDetallePais" materialDesign:HintAssist.Hint="Ubicacion" FontSize="14" Margin="5 0" 
+                              DisplayMemberPath="Nombre"/>
                     <Label Content="Ubicacion" FontWeight="Black"/>
                 </StackPanel>
                 <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0 10">
                     <Label Content="Estado:" FontWeight="Black" FontSize="14"/>
                     <Label x:Name="lbEstado" Content="ACTIVO" FontSize="14"/>
+                    <ComboBox Name="cbxEstado" materialDesign:HintAssist.Hint="Eliga estado" FontSize="14" ItemsSource="{Binding}"
+                              Visibility="Collapsed"/>
                 </StackPanel>
                 <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="0 0">
                     <StackPanel>
-                        <DatePicker Name="dateDetailsFrom" Width="110" Margin="5 0" IsEnabled="False"/>
+                        <DatePicker Name="dateDetailsFrom" Width="110" Margin="5 0" IsEnabled="False" FontSize="14"/>
                         <Label Content="Desde" FontWeight="Black"/>
                     </StackPanel>
                     <StackPanel Margin="30 0 0 0" >
-                        <DatePicker Name="dateDetailsTo" Width="110" IsEnabled="False"/>
+                        <DatePicker Name="dateDetailsTo" Width="110" IsEnabled="False" FontSize="14"/>
                         <Label Content="Hasta" FontWeight="Black"/>
                     </StackPanel>
                 </StackPanel>
-                <Button Grid.Row="5" Width="80" HorizontalAlignment="Right" Padding="5">
+                <Button Grid.Row="5" Width="auto" HorizontalAlignment="Left" Padding="10 0" x:Name="btnGuardar" Margin="20 0" 
+                        Click="btnGuardar_Click" IsEnabled="False">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSave" Margin="0 0 5 0"/>
+                        <TextBlock Text="GUARDAR"/>
+                    </StackPanel>
+
+                </Button>
+                <Button Grid.Row="5" Width="auto" HorizontalAlignment="Right" Padding="10 0" x:Name="btnEditar" Margin="20 0" Click="btnEditar_Click">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Edit" Margin="0 0 5 0"/>
-                        <TextBlock x:Name="btnEditar" Text="EDITAR"/>
+                        <TextBlock Text="EDITAR"/>
                     </StackPanel>
-                   
+
                 </Button>
             </Grid>
         </GroupBox>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,10 +13,10 @@ namespace TourSS_UI
     /// </summary>
     public partial class ClientesUC : UserControl
     {
-        private DataAccess da = new DataAccess();
+        private readonly DataAccess da = new DataAccess();
         //PrintDialog print = new PrintDialog();
-      
-        public IList<ClienteModel> Clientes { get; set; }
+
+        private IList<ClienteModel> Clientes = new List<ClienteModel>();
         
         public ClientesUC()
         {
@@ -27,11 +28,10 @@ namespace TourSS_UI
 
         private void FillDataGrid()
         {
-            //Clientes = da.GetAllClientes();
-            Clientes = da.GetAll<ClienteModel>("Clientes");
-            ClientesDataGrid.ItemsSource = Clientes;
-          
+            Clientes = da.Clientes;
+            ClientesDataGrid.ItemsSource = Clientes;   
         }
+
         private void BtnAgregarCliente_Click(object sender, RoutedEventArgs e)
         {
             MainWindow mw = (MainWindow)Window.GetWindow(this);
@@ -40,41 +40,11 @@ namespace TourSS_UI
             mw.ListViewMenu.IsEnabled = false;
         }
 
-        //private void BtnBuscarCliente_Click(object sender, RoutedEventArgs e)
-        //{
-        //    var clientesBuscados = new List<ClienteModel>();
-
-        //    if (txtBuscarCliente.Text == "")
-        //    {
-        //        ClientesDataGrid.ItemsSource = da.GetAllClientes();
-        //    }
-        //    else
-        //    {
-        //        string nombre = txtBuscarCliente.Text;
-        //        clientesBuscados = da.BuscarClientesNombre(nombre);
-
-        //        ClientesDataGrid.ItemsSource = clientesBuscados;
-        //    }
-        //}
-
         private void TxtBuscarCliente_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var clientesBuscados = new List<ClienteModel>();
-
             txtBuscarCedula.Text = "";
-
-            if (txtBuscarCliente.Text == "")
-            {
-                ClientesDataGrid.ItemsSource = da.GetAll<ClienteModel>("Clientes");
-            }
-            else
-            {
-                string nombre = txtBuscarCliente.Text;
-                clientesBuscados = da.BuscarClientes(new string[] { null, nombre, null });
-
-                if (clientesBuscados != null)
-                    ClientesDataGrid.ItemsSource = clientesBuscados;
-            }
+            string txt = txtBuscarCliente.Text;
+            ClientesDataGrid.ItemsSource = Clientes.Where(x => x.Fullname.ToUpper().Contains(txt)).ToList();
         }
 
         private void TxtBuscarCedula_KeyDown(object sender, KeyEventArgs e)
@@ -85,14 +55,12 @@ namespace TourSS_UI
             {
                 if (!txtBuscarCedula.IsMaskCompleted)
                 {
-                    ClientesDataGrid.ItemsSource = da.GetAll<ClienteModel>("Clientes");
+                    ClientesDataGrid.ItemsSource = Clientes;
                 }
                 else
                 {
-                    var clientesBuscados = new List<ClienteModel>();
                     string cedula = txtBuscarCedula.Text;
-                    clientesBuscados = da.BuscarClientes(new string[] { null, null, cedula });
-
+                    var clientesBuscados = Clientes.Where(c => c.Cedula == cedula).ToList();
                     if (clientesBuscados != null)
                     {
                         ClientesDataGrid.ItemsSource = clientesBuscados;
@@ -105,20 +73,11 @@ namespace TourSS_UI
         /// <summary>
         /// Permite copiar de celda
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ClientesDataGrid_CopyingRowClipboardContent(object sender, DataGridRowClipboardEventArgs e)
         {
             var currenCell = e.ClipboardRowContent[ClientesDataGrid.CurrentCell.Column.DisplayIndex];
             e.ClipboardRowContent.Clear();
             e.ClipboardRowContent.Add(currenCell);
-        }
-
-        private void Detalle_Click(object sender, RoutedEventArgs e)
-        {
-            var detalle = new ClienteDetalle();
-            detalle.ShowDialog();
-            //testPop.IsOpen = true;
         }
 
         private void DgBtnDetalle_Click(object sender, RoutedEventArgs e)
@@ -130,7 +89,14 @@ namespace TourSS_UI
 
         private void DgBtnEditar_Click(object sender, RoutedEventArgs e)
         {
+            var selected = ClientesDataGrid.SelectedItem as ClienteModel;
+            var detalle = new ClienteDetalle(selected, true);
+            detalle.ShowDialog();
+        }
 
+        private void btnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            FillDataGrid();
         }
 
 

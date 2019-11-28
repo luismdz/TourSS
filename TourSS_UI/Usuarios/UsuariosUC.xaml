@@ -6,7 +6,7 @@
               xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:local="clr-namespace:TourSS_UI"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="900">
+             Height="500" Width="940">
     <Grid Background="White">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -23,24 +23,55 @@
 
         <Grid Grid.Row="1">
             <StackPanel Orientation="Horizontal">
-                <TextBox materialDesign:HintAssist.Hint="Buscar Usuario" x:Name="txtBuscarServicio" FontSize="14" Width="300" Height="40" 
-                         Margin="20 0"/>
-                <Button Content="Buscar" x:Name="btnBuscar"/>
+                <DockPanel Margin="0 0 30 0">
+                    <TextBox materialDesign:HintAssist.Hint="Buscar por nombre" x:Name="txtBuscarUsuario" FontSize="14" Width="350" Height="35" 
+                         Margin="20 0 0 0" TextChanged="txtBuscarUsuario_TextChanged" CharacterCasing="Upper"/>
+                    <Button BorderThickness="0" DockPanel.Dock="Right" HorizontalAlignment="Right" Foreground="White" Padding="5">
+                        <StackPanel>
+                            <materialDesign:PackIcon Kind="Search" Height="25" Width="25" Padding="0"/>
+                        </StackPanel>
+                    </Button>
+                </DockPanel>
+                <Button x:Name="btnAgregar" Padding="5" Width="35" Click="btnAgregar_Click">
+                    <materialDesign:PackIcon Kind="AccountsAdd" Width="20" Height="20"/>
+                </Button>
             </StackPanel>
         </Grid>
 
         <Grid Grid.Row="2">
+
             <DataGrid x:Name="dgUsuarios" AutoGenerateColumns="false" AlternatingRowBackground="LightGray" 
-                          CanUserAddRows="False" FontSize="12" IsReadOnly="True" ItemsSource="{Binding}">
+                          CanUserAddRows="False" FontSize="13" IsReadOnly="True" ItemsSource="{Binding}" Margin="10 0 50 0">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Codigo" Binding="{Binding Path = Codigo}"/>
-                    <DataGridTextColumn Header="Cedula" Binding="{Binding Path = Cedula}"/>
                     <DataGridTextColumn Header="Nombre Completo" Binding="{Binding Path = Fullname}"/>
                     <DataGridTextColumn Header="Genero" Binding="{Binding Path = Genero}"/>
                     <DataGridTextColumn Header="Correo" Binding="{Binding Path = Correo}"/>
-                    <DataGridCheckBoxColumn Header="Activo" Binding="{Binding Path = Estado}"/>
+                    <DataGridTextColumn Header="Rol" Binding="{Binding Path = Rol.Descripcion}"/>
+                    <DataGridTemplateColumn Header="Ver Detalle">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button x:Name="dgBtnDetalle" Height="25" Width="40" FontSize="10" materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                                        Click="dgBtnDetalle_Click">
+                                    <materialDesign:PackIcon Kind="ReadMore" HorizontalAlignment="Center"/>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Editar">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button x:Name="dgBtnEditar" Height="25" Width="40" FontSize="10" materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                                        Click="dgBtnEditar_Click">
+                                    <materialDesign:PackIcon Kind="Edit" HorizontalAlignment="Center"/>
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
+
+        
     </Grid>
 </UserControl>

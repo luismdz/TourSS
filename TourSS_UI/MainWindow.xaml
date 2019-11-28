@@ -5,12 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TourSS_UI"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        mc:Ignorable="d" Height="600" Width="1200" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" WindowStyle="None" MouseDown="Dashboard_MouseDown">
+        mc:Ignorable="d" Height="600" Width="1200" WindowStartupLocation="CenterScreen" ResizeMode="NoResize" WindowStyle="None"
+        MouseDown="Dashboard_MouseDown">
     <Grid Background="White">
         
         <StackPanel VerticalAlignment="Top" >
             <Grid Background="#FF0069C0" Height="10" />
-            <StackPanel Orientation="Horizontal" Margin="200 0 0 0">
+            <StackPanel Orientation="Horizontal" Margin="200 0 0 0" MouseDown="StackPanel_MouseDown">
                 <Image Source="Images/icon_TourSS11.jpg" Width="40" Height="40" HorizontalAlignment="Center" Margin="300 0 0 0"/>
                 <TextBlock x:Name="Titulo" Text="Tour Sales System" HorizontalAlignment="Center" FontSize="22" FontFamily="Roboto" Margin="10 10 210 0" 
                            Foreground="#FF0069C0"/>
@@ -71,13 +72,13 @@
                         <TextBlock Text="Catalógo" FontSize="16" VerticalAlignment="Center" Margin="20 0" FontFamily="Roboto"/>
                     </StackPanel>
                 </ListViewItem>
-                <ListViewItem Height="60">
+                <ListViewItem Height="60" x:Name="lvEmpleado">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="Images/account-badge-horizontal-outline.png" VerticalAlignment="Center" Margin="5" Height="30" Width="30"/>
                         <TextBlock Text="Empleados" FontSize="16" VerticalAlignment="Center" Margin="20 0" FontFamily="Roboto"/>
                     </StackPanel>
                 </ListViewItem>
-                <ListViewItem Height="60">
+                <ListViewItem Height="60" x:Name="lvReportes">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="CalendarMultiple" Width="30" Height="30" VerticalAlignment="Center" Margin="5"/>
                         <TextBlock Text="Reportes" FontSize="16" VerticalAlignment="Center" Margin="20 0" FontFamily="Roboto"/>

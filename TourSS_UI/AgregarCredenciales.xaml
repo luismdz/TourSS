@@ -1,0 +1,52 @@
+﻿<Window x:Class="TourSS_UI.AgregarCredenciales"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:TourSS_UI"
+        mc:Ignorable="d"  WindowStartupLocation="CenterOwner" FontFamily="Roboto" Topmost="True"
+        Title="AgregarCredenciales" Height="220" Width="300" WindowStyle="None" BorderThickness="1">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" VerticalAlignment="Center" Background="SlateBlue" Height="30" MouseDown="StackPanel_MouseDown" >
+            <materialDesign:PackIcon Kind="KeyAdd" VerticalAlignment="Center" Height="25" Width="25" Foreground="White"/>
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Center" Width="160">
+                <materialDesign:PackIcon Kind="User" Height="25" Width="25" Foreground="DarkRed"/>
+                <TextBox x:Name="txtUser" materialDesign:HintAssist.Hint="Nombre de Usuario" MaxLength="8" Margin="10 0" Width="110"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <materialDesign:PackIcon Kind="KeyAdd" Height="25" Width="25" Foreground="DarkBlue"/>
+                <PasswordBox x:Name="txtPass" materialDesign:HintAssist.Hint="Nueva Contraseña" MaxLength="8" Margin="10 0" Width="110"/>
+                <PasswordBox x:Name="txtPass2" materialDesign:HintAssist.Hint="Contraseña" MaxLength="8" Margin="10 0" Width="110" Visibility="Collapsed" KeyDown="txtPass2_KeyDown"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <materialDesign:PackIcon Kind="Key" Height="25" Width="22" Foreground="DarkBlue" Margin="0 0 10 0" Name="key"/>
+                <PasswordBox x:Name="txtConfirmarPass" materialDesign:HintAssist.Hint="Confimar Contraseña" MaxLength="8" Margin="0 0" Width="120"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <Button x:Name="btnAgregar" Height="25" Padding="5" Click="btnAgregar_Click" Content="AGREGAR" FontSize="12" Margin="10 0"/>
+                <Button x:Name="btnConfirmar" Height="25" Padding="5" Click="btnConfirmar_Click" Content="CONFIRMAR" FontSize="12" Margin="10 0" Visibility="Collapsed"/>
+                <Button x:Name="btnCancelar" Height="25" Padding="5" Click="btnCancelar_Click" Content="CANCELAR" FontSize="12" Margin="10 0 0 0"/>
+
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

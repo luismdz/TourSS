@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using TourSS_UI.Usuarios;
 using TourSSLibrary;
 
 namespace TourSS_UI
@@ -21,11 +12,43 @@ namespace TourSS_UI
     /// </summary>
     public partial class UsuariosUC : UserControl
     {
-        DataAccess da = new DataAccess();
+        readonly DataAccess da = new DataAccess();
+        private IList<UsuarioModel> Usuarios;
+
         public UsuariosUC()
         {
             InitializeComponent();
-            dgUsuarios.ItemsSource = da.GetAll<UsuarioModel>("Usuarios");
+            Usuarios = da.Usuarios;
+
+            dgUsuarios.ItemsSource = Usuarios;
+        }
+
+        private void txtBuscarUsuario_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string txt = txtBuscarUsuario.Text;
+            dgUsuarios.ItemsSource = Usuarios.Where(x => x.Fullname.ToUpper().Contains(txt)).ToList();
+        }
+
+        private void dgBtnDetalle_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = dgUsuarios.SelectedItem as UsuarioModel;
+            var detalle = new UsuarioDetalle(selected);
+            detalle.ShowDialog();
+        }
+
+        private void dgBtnEditar_Click(object sender, RoutedEventArgs e)
+        {
+            var selected = dgUsuarios.SelectedItem as UsuarioModel;
+            var detalle = new UsuarioDetalle(selected, true);
+            detalle.ShowDialog();
+        }
+
+        private void btnAgregar_Click(object sender, RoutedEventArgs e)
+        {
+            MainWindow mw = (MainWindow)Window.GetWindow(this);
+            mw.GridPrincipal.Children.Clear();
+            mw.GridPrincipal.Children.Add(new AgregarUsuario());
+            mw.ListViewMenu.IsEnabled = false;
         }
     }
 }

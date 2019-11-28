@@ -1,39 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using TourSSLib.Models;
 
 namespace TourSSLibrary
 {
     public class ReservacionModel
     {
-        public UsuarioModel Usuario { get; set; }
-        public ClienteModel Cliente { get; set; }
+        public long ReservacionID { get; set; }
+        public long UsuarioID { get; set; }
+        public long ClienteID { get; set; }
         public DateTime Fecha { get; set; }
-
-        /// <summary>
-        /// Lista de Servicios en la Reservacion
-        /// Obtiene Precio Unidad de cada Servicio
-        /// </summary>
-        public List<ServicioModel> Servicios { get; set; }
-
-        public ServicioModel Servicio { get; set; }
-        //public decimal PrecioUnidad { get; set; }
-        public int Cantidad { get; set; }
-        public decimal Subtotal { get; set; }
-        public decimal Itbis { get; set; }
-        public decimal Total { get => Subtotal + Itbis; }
-
-        public string SubtotalFormatted { get => Subtotal.ToString("C2"); }
-
-        public ReservacionModel()
-        {
-            Usuario = new UsuarioModel();
-            Cliente = new ClienteModel();
-            Servicio = new ServicioModel();
-
-            // Lista de Servicios al ser Consultado
-            Servicios = new List<ServicioModel>();
-        }
-
+        public List<ReservacionDetalle> ReservacionDetalle { get; set; } = new List<ReservacionDetalle>();
     }
 }

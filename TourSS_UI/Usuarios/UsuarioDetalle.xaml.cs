@@ -13,34 +13,34 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using TourSSLibrary;
 
-namespace TourSS_UI.Clientes
+namespace TourSS_UI.Usuarios
 {
     /// <summary>
-    /// Interaction logic for ClienteDetalle.xaml
+    /// Interaction logic for UsuarioDetalle.xaml
     /// </summary>
-    public partial class ClienteDetalle : Window
+    public partial class UsuarioDetalle : Window
     {
-        public ClienteModel Cliente { get; set; }
+        public UsuarioModel Usuario { get; set; }
         public List<string> Generos { get; set; }
 
         private DataAccess da = new DataAccess();
 
-        public ClienteDetalle()
+        public UsuarioDetalle()
         {
             InitializeComponent();
             this.Owner = App.Current.MainWindow;
         }
 
-        public ClienteDetalle(ClienteModel cliente, bool asEdit = false)
+        public UsuarioDetalle(UsuarioModel usuario, bool asEdit = false)
         {
             InitializeComponent();
             this.Owner = App.Current.MainWindow;
-            
-            this.Cliente = cliente;
-            Generos = da.Query<string>("select distinct clienteGenero from Clientes");
+
+            this.Usuario = usuario;
+            Generos = da.Query<string>("select distinct empGenero from Usuarios");
 
             Fill();
-            
+
             if (asEdit)
                 Enable();
         }
@@ -50,23 +50,24 @@ namespace TourSS_UI.Clientes
         /// </summary>
         private void Fill()
         {
-            txtNombre.Content = Cliente.Nombre.ToUpper();
-            txtApellido.Content = Cliente.Apellido.ToUpper();
-            lbCodigo.Content = Cliente.Codigo.ToUpper();
-            lbCedula.Content = Cliente.Cedula;
-            lbCorreo.Content = Cliente.Correo.ToUpper();
+            txtNombre.Content = Usuario.Nombre.ToUpper();
+            txtApellido.Content = Usuario.Apellido.ToUpper();
+            lbCodigo.Content = Usuario.Codigo.ToUpper();
+            lbCedula.Content = Usuario.Cedula;
+            lbCorreo.Content = Usuario.Correo.ToUpper();
+            lbRol.Content = Usuario.Rol.Descripcion.ToUpper();
 
-            if(Cliente.Telefonos != null)
-                lbCelular.Content = Cliente.Telefonos[0].Numero;
+            if (Usuario.Telefonos != null)
+                lbCelular.Content = Usuario.Telefonos[0].Numero;
 
-            if (Cliente.Telefonos.Count > 1)
-                lbTelResidencia.Content = Cliente.Telefonos[1].Numero;
+            if (Usuario.Telefonos.Count > 1)
+                lbTelResidencia.Content = Usuario.Telefonos[1].Numero;
             else
                 lbTelResidencia.Content = "";
 
-            lbGenero.Content = Cliente.Genero == "M" ? "MASCULINO" : Cliente.Genero == "F" ? "FEMENINO" : "INDEFINIDO";
+            lbGenero.Content = Usuario.Genero == "M" ? "MASCULINO" : Usuario.Genero == "F" ? "FEMENINO" : "INDEFINIDO";
             cbxGenero.ItemsSource = Generos;
-            cbxGenero.SelectedItem = Generos.Where(x => x == Cliente.Genero.ToString());
+            cbxGenero.SelectedItem = Generos.Where(x => x == Usuario.Genero.ToString());
         }
 
         private void Enable()
@@ -78,22 +79,10 @@ namespace TourSS_UI.Clientes
             btnHistorial.IsEnabled = false;
 
             txtNombreE.Visibility = Visibility.Visible;
-            txtNombreE.Text = txtNombre.Content.ToString();
-
             txtApellidoE.Visibility = Visibility.Visible;
-            txtApellidoE.Text = txtApellido.Content.ToString();
-
             txtCorreoE.Visibility = Visibility.Visible;
-            txtCorreoE.Text = lbCorreo.Content.ToString();
-
             cbxGenero.Visibility = Visibility.Visible;
-
             btnSave.IsEnabled = true;
-        }
-
-        private void BtnClose_DetalleCliente_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            this.Close();
         }
 
         private bool ValidarDatos()
@@ -102,26 +91,34 @@ namespace TourSS_UI.Clientes
                 && !string.IsNullOrEmpty(txtCorreoE.Text) && cbxGenero.SelectedItem != null ? true : false;
         }
 
+        private void BtnClose_DetalleUsuario_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            this.Close();
+        }
+
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             if(ValidarDatos())
             {
-                var cliente = new ClienteModel()
+                var usuario = new UsuarioModel()
                 {
-                    ID = Cliente.ID,
-                    Codigo = Cliente.Codigo,
-                    Cedula = Cliente.Cedula,
+                    ID = Usuario.ID,
+                    Codigo = Usuario.Codigo,
+                    Cedula = Usuario.Cedula,
                     Nombre = txtNombreE.Text,
                     Apellido = txtApellidoE.Text,
                     Genero = cbxGenero.SelectedItem.ToString(),
                     Correo = txtCorreoE.Text
                 };
 
-                var output = da.Edit(cliente);
-                MessageBox.Show($"Cliente {Cliente.Codigo} actualizado.");
+                var output = da.Edit(usuario);
+                MessageBox.Show($"Usuario {Usuario.Codigo} actualizado.");
             }
             else
                 MessageBox.Show($"TODOS LOS CAMPOS DEBEN ESTAR LLENOS", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+
+
         }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,12 +14,15 @@ namespace TourSS_UI
     public partial class MainWindow : Window
     {
         public UsuarioModel Current { get; set; }
-
+        //private IList<string> Roles = new DataAccess().Roles;
+        
         public MainWindow()
         {
             InitializeComponent();
             GridPrincipal.Children.Clear();
             GridPrincipal.Children.Add(new InicioUC());
+            
+            ValidarRolUsuario();
         }
 
         public MainWindow(UsuarioModel u)
@@ -27,15 +31,29 @@ namespace TourSS_UI
             GridPrincipal.Children.Clear();
             GridPrincipal.Children.Add(new InicioUC());
 
-            Current = u;
-            lbUserName.Content = $"[{Current.Codigo}] {Current.Fullname}";
-            lbUserRol.Content = Current.Rol;
+            if(u != null)
+            {
+                Current = u;
+                lbUserName.Content = $"[{Current.Codigo}] {Current.Fullname}";
+                lbUserRol.Content = Current.Rol.Descripcion;
+            }
+
+            ValidarRolUsuario();
         }
 
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
             Application.Current.Shutdown();
+        }
+
+        private void ValidarRolUsuario()
+        {
+            if(!Current.isAdmin)
+            {
+                lvEmpleado.IsEnabled = false;
+                lvReportes.IsEnabled = false;
+            }
         }
 
         private void ListViewMenu_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -96,5 +114,12 @@ namespace TourSS_UI
             if (e.ChangedButton == MouseButton.Left)
                 this.DragMove();
         }
+
+        private void StackPanel_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                this.DragMove();
+        }
+
     }
 }

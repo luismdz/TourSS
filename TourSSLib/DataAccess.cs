@@ -14,113 +14,270 @@ namespace TourSSLibrary
     {
         private const string database = "TourSSDB";
 
+        //Propiedades
+        public IList<ClienteModel> Clientes
+        {
+            get
+            {
+                var clientes = GetAll<ClienteModel>("Clientes");
+                var telefonos = TelefonosClientes;
+
+                foreach (var c in clientes)
+                {
+                    c.Telefonos = telefonos.Where(t => t.clienteID == c.ID).ToList();
+                }
+                return clientes;
+            }
+
+        }
+
+        public IList<UsuarioModel> Usuarios
+        {
+            get
+            {
+                var usuarios = GetAll<UsuarioModel>("Usuarios");
+                var telefonos = TelefonosUsuarios;
+
+                foreach (var u in usuarios)
+                {
+                    u.Credencial = Credenciales.Where(x => x.UsuarioID == u.ID).SingleOrDefault();
+                    u.Telefonos = telefonos.Where(t => t.usuarioID == u.ID).ToList();
+                    u.Rol = Roles.Where(x => x.ID == u.RolID).FirstOrDefault();
+                }
+                return usuarios;
+            }
+        }
+
+        public IList<TelefonoModel> TelefonosUsuarios { get => GetAll<TelefonoModel>($"Telefonos_Usuarios").ToList(); }
+        public IList<TelefonoModel> TelefonosClientes { get => GetAll<TelefonoModel>($"Telefonos_Clientes").ToList(); }
+        public IList<ServicioModel> Servicios { get => GetAll<ServicioModel>("Servicios"); }
+        public IList<UbicacionModel> Ubicaciones { get => GetAll<UbicacionModel>("Paises"); }
+        public IList<Credencial> Credenciales { get => Query<Credencial>("select * from Credenciales"); }
+        public IList<ReservacionModel> Reservaciones { get => Query<ReservacionModel>("select * from Reservaciones"); }
+        public IList<ReservacionDetalle> ReservacionDetalle { get => Query<ReservacionDetalle>("select * from ReservacionDetalle"); }
+        public List<Rol> Roles { get => Query<Rol>(
+            $"select " +
+            $"rolID as ID " +
+            $",case when descripcion like '%Administrador Base de Datos%'" +
+            $"then 'DBA' else upper(descripcion) end as Descripcion " +
+            $"from Roles");
+        }
+
         public string ConnectionString(string value) => 
             ConfigurationManager.ConnectionStrings[value].ConnectionString;
 
         public DataAccess() { }
 
         /// <summary>
-        /// Metodo para obtener todos los registros de tipo <T> de manera generica
+        /// Query dinamico para retornar informacion de la DB
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public IList<T> GetAll<T>(string type)
+        public List<T> Query<T>(string qry)
         {
-            IList<T> Items = new List<T>();
-
             using (IDbConnection db = new SqlConnection(ConnectionString(database)))
             {
-                Items = db.Query<T>($"dbo.usp_{type}_GetAll").ToList();
-
-                if (Items is List<ClienteModel>)
-                {
-                    foreach (var cliente in Items as IList<ClienteModel>)
-                    {
-                        var p = new DynamicParameters();
-                        p.Add("@id", cliente.ID);
-                        cliente.Telefonos = db.Query<string>("dbo.usp_TelefonosCliente_Get @id", p).ToList();
-                    }
-                }
+                var result = db.Query<T>(qry).ToList();
+                return result;
             }
-            return Items;
         }
 
         /// <summary>
-        /// Busca cliente(s) en la bd por medio de su cedula, nombre y/o apellido y codigo
+        /// Metodo para obtener todos los registros de tipo <T> de manera generica
         /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public List<ClienteModel> BuscarClientes(params string[] param)
+        private IList<T> GetAll<T>(string type)
         {
-            List<ClienteModel> clientes = new List<ClienteModel>();
-            try
+            using (IDbConnection db = new SqlConnection(ConnectionString(database)))
             {
-                using (IDbConnection db = new SqlConnection(ConnectionString(database)))
+                var Items = db.Query<T>($"dbo.usp_{type}_GetAll").ToList();
+                return Items;
+            }
+        }
+
+        public long Insert<T>(T item)
+        {
+            using (var conn = new SqlConnection(ConnectionString(database)))
+            {
+                conn.Open();
+
+                // Begin the transaction
+                using (var transaction = conn.BeginTransaction())
                 {
-                    var p = new DynamicParameters();
-                    p.Add("@codigo", param[0]);
-                    p.Add("@nombre", param[1]);
-                    p.Add("@cedula", param[2]);
+                    var param = new DynamicParameters();
+                    int affectedRows = 0;
+                    long newID = 0;
 
-                    clientes = db.Query<ClienteModel>("dbo.usp_BuscarClientes @codigo, @nombre, @cedula", p).ToList();
-
-                    if (clientes.Count != 0)
+                    if (item is ClienteModel)
                     {
-                        foreach (var cliente in clientes)
+                        var c = item as ClienteModel;
+
+                        param.Add("cedula", c.Cedula);
+                        param.Add("nombre", c.Nombre);
+                        param.Add("apellido", c.Apellido);
+                        param.Add("genero", c.Genero);
+                        param.Add("correo", c.Correo);
+
+                        affectedRows = conn.Execute("usp_Clientes_Insert", param, commandType: CommandType.StoredProcedure, transaction: transaction);
+
+                        newID = Convert.ToInt64(conn.ExecuteScalar<object>("select MAX(clienteID) from Clientes", null, transaction: transaction));
+
+                        foreach (var t in c.Telefonos)
                         {
-                            var id = new DynamicParameters();
-                            id.Add("@id", cliente.ID);
-                            cliente.Telefonos = db.Query<string>("dbo.usp_TelefonosCliente_Get @id", id).ToList();
+                            affectedRows = conn.Execute($"insert into ClienteTelefonos(clienteID, numero) values({newID}, '{t.Numero}')", transaction: transaction);
                         }
                     }
-                    else return null;
+                    
+                    else if (item is UsuarioModel)
+                    {
+                        var c = item as UsuarioModel;
+
+                        param.Add("cedula", c.Cedula);
+                        param.Add("nombre", c.Nombre);
+                        param.Add("apellido", c.Apellido);
+                        param.Add("genero", c.Genero);
+                        param.Add("correo", c.Correo);
+                        param.Add("rolID", c.Rol.ID);
+
+                        affectedRows = conn.Execute("usp_Usuarios_Insert", param, commandType: CommandType.StoredProcedure, transaction: transaction);
+
+                        newID = Convert.ToInt64(conn.ExecuteScalar<object>("select MAX(usuarioID) from Usuarios", null, transaction: transaction));
+
+                        foreach (var t in c.Telefonos)
+                        {
+                            affectedRows = conn.Execute($"insert into UsuarioTelefonos(usuarioID, numero) values({newID}, '{t.Numero}')", transaction: transaction);
+                        }
+                    }
+                    else if(item is ServicioModel)
+                    {
+                        var s = item as ServicioModel;
+
+                        param.Add("descripcion", s.Descripcion);
+                        param.Add("precio", s.Precio);
+                        param.Add("cupos", s.CuposDisponibles);
+                        param.Add("fechaDesde", s.fechaDesde.Date);
+                        param.Add("fechaHasta", s.fechaHasta.Date);
+                        param.Add("paisID", s.UbicacionID);
+
+                        affectedRows = conn.Execute("usp_Servicios_Insert", param, commandType: CommandType.StoredProcedure, transaction: transaction);
+                        newID = Convert.ToInt64(conn.ExecuteScalar<object>("select MAX(servicioID) from Servicios", null, transaction: transaction));
+                    }
+                    else if(item is Credencial)
+                    {
+                        var c = item as Credencial;
+                        affectedRows = conn.Execute($"insert into Credenciales(username, password, usuarioID) VALUES('{c.Username}', '{c.Password}', {c.UsuarioID})", 
+                            transaction: transaction);
+
+                        transaction.Commit();
+                        return affectedRows;
+                    }
+                    // Commit tran
+                    transaction.Commit();
+                    return newID;
                 }
             }
-            catch (Exception)
-            {
-                return null;
-            }
-            return clientes;
         }
 
-        public List<ServicioModel> BuscarServicios(int? ubicacionID, int? servicioID, DateTime? fechaDesde, DateTime? fechaHasta)
+        public int Edit<T>(T item)
         {
-            try
+            using (var conn = new SqlConnection(ConnectionString(database)))
             {
-                List<ServicioModel> servicios = new List<ServicioModel>();
+                var param = new DynamicParameters();
+
+                if (item is ClienteModel)
+                {
+                    var s = item as ClienteModel;
+                    param.Add("id", s.ID);
+                    param.Add("nombre", s.Nombre);
+                    param.Add("apellido", s.Apellido);
+                    param.Add("genero", s.Genero);
+                    param.Add("correo", s.Correo);
+
+                    var affectedRows = conn.Execute("usp_Editar_Cliente", param, commandType: CommandType.StoredProcedure);
+                    return affectedRows;
+                }
+
+                else if (item is UsuarioModel)
+                {
+                    var s = item as UsuarioModel;
+                    param.Add("id", s.ID);
+                    param.Add("nombre", s.Nombre);
+                    param.Add("apellido", s.Apellido);
+                    param.Add("genero", s.Genero);
+                    param.Add("correo", s.Correo);
+
+                    var affectedRows = conn.Execute("usp_Editar_Usuario", param, commandType: CommandType.StoredProcedure);
+                    return affectedRows;
+                }
+                else if(item is ServicioModel)
+                {
+                    var s = item as ServicioModel;
+                    param.Add("id", s.ID);
+                    param.Add("descripcion", s.Descripcion);
+                    param.Add("precio", s.Precio);
+                    param.Add("cupos", s.CuposDisponibles);
+                    param.Add("fechaDesde", s.fechaDesde);
+                    param.Add("fechaHasta", s.fechaHasta);
+                    param.Add("paisID", s.UbicacionID);
+
+                    var affectedRows = conn.Execute("usp_Editar_Servicio", param, commandType: CommandType.StoredProcedure);
+                    return affectedRows;
+                }
+                else
+                    return 0;
+                
+            }
+        }
+        /// <summary>
+        /// Retornar informacion de las ventas para el reporte
+        /// </summary>
+        /// <param name="tipoDeReporte"></param>
+        /// <returns></returns>
+        public List<ReporteModel> GenerarReporte(int? tipoDeReporte)
+        {
+            List<ReporteModel> registros = new List<ReporteModel>();
+            List<ReservacionDetalle> detalles = new List<ReservacionDetalle>();
+            try
+            { 
                 using (IDbConnection db = new SqlConnection(ConnectionString(database)))
                 {
-                    var p = new DynamicParameters();
-                    p.Add("@paisID", ubicacionID);
-                    p.Add("@fechaDesde", fechaDesde);
-                    p.Add("@fechaHasta", fechaHasta);
-                    p.Add("ID", servicioID);
+                    //
+                    switch(tipoDeReporte)
+                    {
+                        case 1:
+                            registros = db.Query<ReporteModel>($"Select * from dbo.Summary_Sales_by_Dates").ToList();
+                            break;
+                        case 2:
+                            registros = db.Query<ReporteModel>($"usp_Sales_by_Customers").ToList();
+                            break;
 
-                    servicios = db.Query<ServicioModel>("dbo.usp_BuscarServicios @paisID, @fechaDesde, @fechaHasta, @ID", p).ToList();
+                    }
+
+                    foreach (var r in registros)
+                    {
+                        r.Reservacion = Reservaciones.Where(o => o.ReservacionID == r.ReservacionID).FirstOrDefault();
+                        r.Cliente = Clientes.Where(c => c.ID == r.ClienteID).FirstOrDefault();
+                        r.Detalles = ReservacionDetalle.Where(d => d.ReservacionID == r.ReservacionID).ToList();
+                    }
+                    return registros;
                 }
-                return servicios;
             }
-            catch(Exception)
+            catch(SqlException)
             {
                 return null;
-            }
+            }  
         }
 
-        public string Reservar(IList<ReservacionModel> items, long clienteID, long usuarioID)
+            /// <summary>
+            /// Inserta en Reservacion y ReservacionDetalle
+            /// </summary>
+            /// <param name="items">Lista de Servicios a reservar</param>
+            /// <param name="clienteID">Id del cliente de la reservacion</param>
+            /// <param name="usuarioID">Id del usuario que genera la reservacion</param>
+            /// <returns></returns>
+        public string Reservar(IList<ReservacionDetalle> items, long clienteID, long usuarioID)
         {
             try
             {
                 using (var conn = new SqlConnection(ConnectionString(database)))
                 {
-                    //var p = new DynamicParameters();
-                    //p.Add("@usuarioID", usuarioID);
-                    //p.Add("@clienteID", clienteID);
-                    //p.Add("@servicios", servicios.AsTableValuedParameter("List"));
-                    //p.Add("@fecha", fecha);
-
-                    //var affectedRows = conn.Execute("Test", p, commandType: CommandType.StoredProcedure);
-                    //return affectedRows.ToString();
                     conn.Open();
 
                     // Begin the transaction
@@ -131,11 +288,11 @@ namespace TourSSLibrary
                         paramMaster.Add("usuarioID", usuarioID);
                         paramMaster.Add("clienteID", clienteID);
 
-                        var affectedRows = conn.Execute("usp_SaveReservacion", paramMaster, commandType: CommandType.StoredProcedure, transaction: transaction);
+                        var affectedRows = conn.Execute("usp_SetReservacion", paramMaster, commandType: CommandType.StoredProcedure, transaction: transaction);
 
                         //Obtener ultimo ID registrado en Reservaciones
-                        long newID = Convert.ToInt64(conn.ExecuteScalar<object>("SELECT @@IDENTITY", null, transaction: transaction));
-
+                        long newID = Convert.ToInt64(conn.ExecuteScalar<object>("select max(reservacionID) from Reservaciones", null, transaction: transaction));
+        
                         //Iterar elementos de la lista de Reservaciones
                         foreach(var item in items)
                         {
@@ -155,7 +312,7 @@ namespace TourSSLibrary
                 }
             }
             catch (SqlException e)
-            {    
+            {
                 return e.Message;
             }
         }
@@ -164,9 +321,8 @@ namespace TourSSLibrary
         /// <summary>
         /// Valida credenciales de usuario para entrar en el sistema
         /// </summary>
-        /// <param name="u"></param>
-        /// <param name="p"></param>
-        /// <returns></returns>
+        /// <param name="u"> Username </param>
+        /// <param name="p"> Password </param>
         public (UsuarioModel, bool) GetUserByLogin(string u, string p)
         {
             UsuarioModel usuario = new UsuarioModel();
@@ -181,7 +337,11 @@ namespace TourSSLibrary
                 esValido = db.Query<bool>("dbo.usp_ValidarCredenciales @username, @password", param).SingleOrDefault();
 
                 if (esValido)
+                {
                     usuario = db.Query<UsuarioModel>("dbo.usp_Usuario_GetByLogin @username, @password", param).SingleOrDefault();
+                    usuario.Rol = Roles.Where(x => x.ID == usuario.RolID).SingleOrDefault();
+                }
+                
                 else
                     usuario = null;
             }

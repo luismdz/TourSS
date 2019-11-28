@@ -11,7 +11,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:local="clr-namespace:TourSS_UI"
         mc:Ignorable="d"
-        Title="LoginWindow" Height="500" Width="450" ResizeMode="NoResize" Icon="icon_TourSS.ico" WindowStyle="SingleBorderWindow" 
+        Title="TourSS" Height="500" Width="450" ResizeMode="NoResize" Icon="icon_TourSS.ico" WindowStyle="SingleBorderWindow" 
             WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>

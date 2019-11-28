@@ -7,26 +7,18 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              mc:Ignorable="d" 
-             Height="500" Width="850">
-    <!--<materialDesign:TransitioningContent x:Name="TransitioningContentSlide" 
-                                         OpeningEffect="{materialDesign:TransitionEffect slideInFromLeft, Duration=0:0:0.8}">-->
-    
-        <Grid Background="White">
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
-            <RowDefinition Height="100"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="80"/>
-        </Grid.RowDefinitions>-->
-       
-        <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="auto" Width="750">
-            <StackPanel Width="700" Height="auto" VerticalAlignment="Top" HorizontalAlignment="Left" Orientation="Horizontal">
+             Height="500" Width="900">
+
+    <Grid Background="White">
+ 
+        <Grid VerticalAlignment="Top" HorizontalAlignment="Center" Height="auto" Width="auto">
+            <StackPanel Width="auto" Height="auto" VerticalAlignment="Top" HorizontalAlignment="Left" Orientation="Horizontal">
                 <Image Width="50" Height="50" Margin="0" VerticalAlignment="Center" Source="/TourSS;component/Images/target.png"/>
-                <TextBlock Text="Clientes" Width="100" Height="40" FontSize="24" Margin="20 10" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                <TextBlock Text="Clientes" FontWeight="DemiBold" FontSize="32" Margin="20 10" VerticalAlignment="Center" HorizontalAlignment="Left"/>
             </StackPanel>
             <StackPanel Width="auto" Height="auto" Margin="0 60 0 0" Orientation="Horizontal">
                 <!--<TextBlock Text="Buscar Cliente: " FontSize="14" VerticalAlignment="Center" Margin="0 5 10 0" FontWeight="DemiBold"/>-->
-                <DockPanel Margin="0 0 30 0">
+                <DockPanel Margin="30 10 30 0">
                     <TextBox x:Name="txtBuscarCliente" Width="350" Margin="10 0 0 0"  FontSize="14" materialDesign:HintAssist.Hint="Buscar cliente por nombre"
                          TextChanged="TxtBuscarCliente_TextChanged" CharacterCasing="Upper" HorizontalAlignment="Stretch"/>
                     <Button BorderThickness="0" DockPanel.Dock="Right" HorizontalAlignment="Right" Foreground="White" Padding="5">
@@ -40,11 +32,15 @@
                 <xctk:MaskedTextBox x:Name="txtBuscarCedula" materialDesign:HintAssist.Hint="Cédula" FontSize="14" Margin="10 0 0 0" MaxLength="13" 
                                      Mask="000-0000000-0" VerticalAlignment="Center" ToolTip="Buscar Cliente por la Cédula"
                                      KeyDown="TxtBuscarCedula_KeyDown" Width="100" BorderThickness="0 0 0 2" PromptChar=" " IncludeLiteralsInValue="False"/>
+
+                <Button x:Name="btnRefresh" Margin="120 0" Padding="5" Click="btnRefresh_Click">
+                    <materialDesign:PackIcon Kind="Refresh" Width="25" Height="25"/>
+                </Button>
             </StackPanel>
         </Grid>
 
         <DockPanel HorizontalAlignment="Stretch" Width="auto" Margin="10 120">
-            <DataGrid x:Name="ClientesDataGrid" AutoGenerateColumns="false" AlternatingRowBackground="LightGray" Width="800"
+            <DataGrid x:Name="ClientesDataGrid" AutoGenerateColumns="false" AlternatingRowBackground="LightGray" 
                       CanUserAddRows="False" FontSize="14" IsReadOnly="True" ItemsSource="{Binding}" CanUserResizeColumns="False"
                       CanUserResizeRows="False" CanUserReorderColumns="False" CopyingRowClipboardContent="ClientesDataGrid_CopyingRowClipboardContent">
               

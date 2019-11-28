@@ -11,21 +11,91 @@
     <Grid Background="#fff">
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
-            <RowDefinition Height="100"/>
+            <RowDefinition Height="70"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="20"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Image Source="/TourSS;component/Images/diagram.png" Margin="20 0 10 0" />
-            <TextBlock Text="REPORTES" VerticalAlignment="Bottom" FontSize="26" FontWeight="Bold"/>
+            <Image Source="/TourSS;component/Images/diagram.png" Margin="20 0 5 0" Width="50" Height="50" VerticalAlignment="Bottom"/>
+            <TextBlock Text="Reportes" VerticalAlignment="Bottom" FontSize="32" FontWeight="Bold" Padding="0" />
         </StackPanel>
+        <Grid Grid.Row="1" Margin="10 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Tipo de Reporte: " FontSize="14" FontWeight="Black" VerticalAlignment="Center"/>
+                <ComboBox x:Name="cmbxTipoReporte" Width="150" Margin="10 0" FontSize="14" SelectionChanged="cmbxTipoReporte_SelectionChanged"/>
+            </StackPanel>
+            <StackPanel Name="stkFechas" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Height="30" Visibility="Visible">
+                <TextBlock Text="Desde:" VerticalAlignment="Center" FontSize="14" FontWeight="Black" Margin="20 0 10 0"/>
+                <DatePicker Name="dtpDesde" Width="100" FontSize="14" />
 
+                <TextBlock Text="Hasta:" VerticalAlignment="Center" FontSize="14" FontWeight="Black" Margin="20 0 10 0"/>
+                <DatePicker Name="dtpHasta" Width="100" FontSize="14" />
+            </StackPanel>
+
+            <StackPanel x:Name="stkMensual" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Height="30"
+                       Visibility="Collapsed">
+                <TextBlock Text="Mes:" VerticalAlignment="Center" FontSize="14" FontWeight="Black" Margin="20 0 10 0"/>
+                <ComboBox x:Name="cbxMes" Width="100" />
+               
+            </StackPanel>
+
+            <Button Grid.Column="3" x:Name="btnBuscar" Background="SlateBlue" Padding="10 0" Margin="0 0"
+                    HorizontalAlignment="Left" Click="BtnBuscar_Click">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="GENERAR" VerticalAlignment="Center" FontSize="12"/>
+                    <materialDesign:PackIcon Kind="TableSearch" Margin="5 0 0 0"/>
+                </StackPanel>
+            </Button>
+            <!--<Button Grid.Column="3" x:Name="btnExport" Background="GhostWhite" Padding="10 0" Margin="120 0 0 0"
+                    HorizontalAlignment="Right" Foreground="Black" FontWeight="Black" Click="btnExport_Click">
+                <materialDesign:PackIcon Kind="ExportVariant" />
+            </Button>-->
+
+
+
+
+        </Grid>
         <DataGrid Grid.Row="2" Name="dgReportes" ItemsSource="{Binding}" CanUserSortColumns="True" CanUserAddRows="False"
-                  AutoGenerateColumns="False" materialDesign:DataGridAssist.CellPadding="13 8 8 8" materialDesign:DataGridAssist.ColumnHeaderPadding="8">
+                  AutoGenerateColumns="False" materialDesign:DataGridAssist.ColumnHeaderPadding="5" Visibility="Visible">
             <DataGrid.Columns>
-                <materialDesign:MaterialDataGridTextColumn Header="# Reservacion"/>
+                <materialDesign:MaterialDataGridTextColumn Header="# Reservacion" Binding="{Binding Path=ReservacionID}"/>
+                <DataGridTextColumn Header="Cod. Cliente" Binding="{Binding Path=Cliente.Codigo}"/>
+                <DataGridTextColumn Header="Nombre del Cliente" Binding="{Binding Path=Cliente.Fullname}" />
+                <DataGridTextColumn Header="Fecha" Binding="{Binding Path=Reservacion.Fecha, StringFormat={}{0:dd/MM/yyyy}}"/>
+                <DataGridTextColumn Header="Subtotal"  Binding="{Binding Path=Subtotal, StringFormat={}{0:C2}}" />
+                <DataGridTextColumn Header="ITBIS" Binding="{Binding Path=Itbis, StringFormat={}{0:C2}}"/>
+                <DataGridTextColumn Header="Total (RD$)" Binding="{Binding Path=Total, StringFormat={}{0:C2}}"/>
             </DataGrid.Columns>
         </DataGrid>
+
+        <DataGrid Grid.Row="2" Name="dgReporteCliente" ItemsSource="{Binding}" CanUserSortColumns="True" CanUserAddRows="False"
+                  AutoGenerateColumns="False" materialDesign:DataGridAssist.ColumnHeaderPadding="5" Visibility="Collapsed" FontSize="14">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Cod. Cliente" Binding="{Binding Path=Cliente.Codigo}"/>
+                <DataGridTextColumn Header="Nombre del Cliente" Binding="{Binding Path=Cliente.Fullname}" />
+                <DataGridTextColumn Header="Subtotal"  Binding="{Binding Path=Subtotal, StringFormat={}{0:C2}}" />
+                <DataGridTextColumn Header="ITBIS" Binding="{Binding Path=Itbis, StringFormat={}{0:C2}}"/>
+                <DataGridTextColumn Header="Total (RD$)" Binding="{Binding Path=Total, StringFormat={}{0:C2}}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Grid Grid.Row="3">
+          
+            <StackPanel  VerticalAlignment="Top" Background="LightSeaGreen">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="10 0">
+                    <TextBlock Text="TOTAL GENERAL = " FontSize="14" FontWeight="Black" Foreground="White" VerticalAlignment="Center" FontFamily="Consolas"/>
+                    <Label Name="lbTotal" FontSize="14" Foreground="#fff" Content="$0,000,000.00" FontWeight="Black" FontFamily="Consolas"/>
+                </StackPanel>
+
+            </StackPanel>
+        </Grid>
     </Grid>
 </UserControl>

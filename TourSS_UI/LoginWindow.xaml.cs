@@ -35,7 +35,7 @@ namespace TourSS_UI
             string username = txtUsername.Text;
             string password = txtPassword.Password;
 
-            UsuarioModel usuario = new UsuarioModel();
+            UsuarioModel usuario;
             bool esValido;
 
             (usuario, esValido) = da.GetUserByLogin(username, password);

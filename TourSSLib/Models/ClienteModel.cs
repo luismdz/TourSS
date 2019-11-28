@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using TourSSLib.Models;
 
 namespace TourSSLibrary
 {
@@ -11,9 +12,9 @@ namespace TourSSLibrary
         public string Cedula { get; set; }
         public string Nombre { get; set; }
         public string Apellido { get; set; }
-        public char Genero { get; set; }
+        public string Genero { get; set; }
         public string Correo { get; set; }
-        public List<string> Telefonos { get; set; }
+        public List<TelefonoModel> Telefonos { get; set; }
 
         public string Fullname { get => $"{Nombre} {Apellido}"; }
 

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TourSS_UI.Properties
+namespace TourSSUI.Properties
 {
 
 

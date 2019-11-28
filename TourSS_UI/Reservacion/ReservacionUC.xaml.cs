@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using TourSS_UI.Reservacion;
+using TourSSLib.Models;
 using TourSSLibrary;
 
 namespace TourSS_UI
@@ -18,20 +20,15 @@ namespace TourSS_UI
     public partial class ReservacionUC : UserControl
     {
         private DataAccess da = new DataAccess();
+        private List<ReservacionDetalle> Items = new List<ReservacionDetalle>();
+        private IList<ClienteModel> clientes;
+        private IList<ServicioModel> servicios;
+        private ReservacionModel reservacion;
+        private ReservacionDetalle reservacionDetalle;
+        private UsuarioModel Usuario;
 
-        IList<ReservacionModel> Items = new List<ReservacionModel>();
-        ReservacionModel reservacion;
-
-        // Crear tabla temporal para agregar como parametro (Agregar a DataAccess)
-        DataTable servicios = new DataTable("List");
-        ClienteModel reservacionCliente;
-
-        //// Listas para pasar como argumentos Tipo "Tabla" al Stored Procedure
-        //List<long> serviciosID = new List<long>();
-        //List<int> cantidades = new List<int>();
-        //List<string> fechas = new List<string>();
-
-        public UsuarioModel Usuario { get; set; }
+        private static readonly Regex regex = new Regex("[^0-9]");
+        private static bool IsTextAllowed(string text) => !regex.IsMatch(text);
 
         public ReservacionUC()
         {
@@ -46,31 +43,24 @@ namespace TourSS_UI
 
             MainWindow mw = (MainWindow)Application.Current.MainWindow;
             Usuario = mw.Current;
+            servicios = da.Servicios;
+            clientes = da.Clientes;
+
             lbUser.Content = $"[{Usuario.Codigo}] {Usuario.Fullname}";
-
-            comboxClienteR.ItemsSource = da.GetAll<ClienteModel>("Clientes");
-            comboxServicioR.ItemsSource = da.GetAll<ServicioModel>("Servicios");
-
-            servicios.Columns.Add("servicioID", typeof(long));
-            servicios.Columns.Add("cantidad", typeof(int));
-
+            comboxClienteR.ItemsSource = clientes;
+            comboxServicioR.ItemsSource = servicios;
         }
-
-        private static readonly Regex regex = new Regex("[^0-9]");
-
-        private static bool IsTextAllowed(string text) => !regex.IsMatch(text);
         
         private void TxtClienteCodigo_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 string codigo = "TC-" + txtClienteCodigo.Text;
-                if (txtClienteCodigo.Text != "")
+                if (!string.IsNullOrEmpty(txtClienteCodigo.Text))
                 {
-                    var clientesBuscados = new List<ClienteModel>();
-                    clientesBuscados = da.BuscarClientes(new string[] { codigo, null, null });
+                    ClienteModel cliente = clientes.Where(c => c.Codigo == codigo).SingleOrDefault();
 
-                    if (clientesBuscados == null)
+                    if (cliente == null)
                     {
                         _ = MessageBox.Show($"Cliente [ {codigo} ] no existe", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                         lbClienteNombre.Content = "NO EXISTE";
@@ -78,16 +68,20 @@ namespace TourSS_UI
                     else
                     {
                         _ = MessageBox.Show($"Cliente [ {codigo} ] ENCONTRADO", "SUCCESS", MessageBoxButton.OK, MessageBoxImage.Information);
-                        lbClienteNombre.Content = $"[{clientesBuscados[0].Codigo}] {clientesBuscados[0].Fullname}";
+                        lbClienteNombre.Content = $"[{cliente.Codigo}] {cliente.Fullname}";
 
-                        //comboxClienteR.SelectedIndex = comboxClienteR.Items.Filter()
-                        comboxClienteR.IsEnabled = false;
+                        comboxClienteR.ItemsSource = clientes.Where(c => c.ID == cliente.ID);
+                        comboxClienteR.SelectedIndex = 0;
                     }
                 }
                 else
+                {
                     _ = MessageBox.Show("INGRESE CODIGO DE CLIENTE", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                    comboxClienteR.SelectedIndex = -1;
+                }
+
+                txtClienteCodigo.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }
-            comboxClienteR.SelectedIndex = -1;
         }
 
         private void ComboxClienteR_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -101,6 +95,17 @@ namespace TourSS_UI
             }
         }
 
+        private bool RevisarFechas(ServicioModel i)
+        {
+            bool result = true;
+
+            foreach(var s in Items)
+            {
+                result = i.fechaDesde > s.Servicio.fechaHasta ? true : false;
+            }
+            return result;
+        }
+
         private void BtnAgregar_Click(object sender, RoutedEventArgs e)
         {
             ServicioModel item = (ServicioModel)comboxServicioR.SelectedItem;
@@ -108,43 +113,41 @@ namespace TourSS_UI
 
             if (item != null && cliente != null)
             {
-                int qty = (int)qtyPicker.Value;
-                decimal subtotal = item.Precio * qty;
-                decimal itbis = subtotal * (decimal)0.18;
-                decimal total = subtotal + itbis;
-
-                if(qty >= 1)
+                if(RevisarFechas(item))
                 {
-                    reservacion = new ReservacionModel();
-                    reservacionCliente = new ClienteModel();
+                    int qty = (int)qtyPicker.Value;
+                    decimal subtotal = item.Precio * qty;
+                    decimal itbis = subtotal * (decimal)0.18;
+                    //decimal total = subtotal + itbis;
 
-                    reservacion.Cliente = cliente;
-                    reservacion.Servicio = item;
-                    reservacion.Cantidad = qty;
-                    reservacion.Subtotal = subtotal;
-                    reservacion.Itbis = itbis;
-                    reservacion.Fecha = dateReservacion.SelectedDate.Value.Date;
-                    //reservacion.Total = total;
+                    if (qty >= 1)
+                    {
+                        reservacion = new ReservacionModel();
+                        reservacionDetalle = new ReservacionDetalle();
 
-                    Items.Add(reservacion);    
-                    dgReservacion.Items.Add(reservacion);
-                    ActualizarPrecios(reservacion, null);
+                        reservacion.ClienteID = cliente.ID;
+                        reservacion.Fecha = dateReservacion.SelectedDate.Value.Date;
 
-                    //serviciosID.Add(item.ID);
-                    //cantidades.Add(qty);
-                    //fechas.Add(reservacion.Fecha);
+                        reservacionDetalle.Servicio = item;
+                        reservacionDetalle.Cantidad = qty;
+                        reservacionDetalle.Subtotal = subtotal;
+                        reservacionDetalle.Itbis = itbis;
 
-                    // Agregar ID del servicio actual a la Tabla Temporal
-                    servicios.Rows.Add(item.ID, qtyPicker.Value);
+                        Items.Add(reservacionDetalle);
+                        dgReservacion.Items.Add(reservacionDetalle);
+                        ActualizarPrecios(reservacionDetalle, null);
 
-                    //item.CuposDisponibles -= qty;
-                    qtyPicker.Value = 1;
-                    comboxClienteR.IsEnabled = false;
-                    txtClienteCodigo.IsEnabled = false;
-                    comboxServicioR.SelectedIndex = -1;
+                        //item.CuposDisponibles -= qty;
+                        qtyPicker.Value = 1;
+                        comboxClienteR.IsEnabled = false;
+                        txtClienteCodigo.IsEnabled = false;
+                        comboxServicioR.SelectedIndex = -1;
+                    }
+                    else
+                        _ = MessageBox.Show("LA CANTIDAD SELECCIONADA NO ES VALIDA", "ERROR", MessageBoxButton.OK);
                 }
                 else
-                    _ = MessageBox.Show("LA CANTIDAD SELECCIONADA NO ES VALIDA", "ERROR", MessageBoxButton.OK);
+                    _ = MessageBox.Show("FECHA DEL SERVICIO CHOCA CON OTRO SERVICIO SELECCIONADO", "ERROR", MessageBoxButton.OK);
             }
             else
                 _ = MessageBox.Show("DEBE SELECCIONAR EL CLIENTE Y AL MENOS UN PRODUCTO", "ERROR", MessageBoxButton.OK);
@@ -156,7 +159,7 @@ namespace TourSS_UI
         /// </summary>
         /// <param name="i"></param>
         /// <param name="d"></param>
-        private void ActualizarPrecios(ReservacionModel i, ReservacionModel d)
+        private void ActualizarPrecios(ReservacionDetalle i, ReservacionDetalle d)
         {
             decimal subtotal = decimal.Parse((string)lbSubtotal.Content,
                 NumberStyles.AllowCurrencySymbol | NumberStyles.Number);
@@ -187,7 +190,7 @@ namespace TourSS_UI
 
         private bool esValida() =>
             Usuario != null && reservacion != null && Items != null &&
-            reservacion.Cantidad < reservacion.Servicio.CuposDisponibles ? true : false; 
+            reservacionDetalle.Cantidad < reservacionDetalle.Servicio.CuposDisponibles ? true : false; 
        
 
         private void BtnReservar_Click(object sender, RoutedEventArgs e)
@@ -195,17 +198,11 @@ namespace TourSS_UI
             if(esValida())
             {
                 var usuarioID = Usuario.ID;
-                var clienteID = reservacion.Cliente.ID;
+                var clienteID = reservacion.ClienteID;
 
-                var output = da.Reservar(Items, clienteID, usuarioID);
-
-                if (Convert.ToInt64(output) > 1000)
-                {
-                    MessageBox.Show($"RESERVACION #{output} CREADA.");
-                    ClearDataGrid();
-                }
-                else
-                    MessageBox.Show($"ERROR. NO SE PUDO CREAR RESERVACION", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                var factura = new Factura(Items, clienteID, usuarioID);
+                factura.ShowDialog();
+                ClearDataGrid();
             }
             else
                 MessageBox.Show($"ERROR. ALGUNOS DATOS ESTAN INCORRECTOS, FAVOR VALIDAR!", "DATOS NO VALIDOS", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -213,6 +210,7 @@ namespace TourSS_UI
 
         private void ClearDataGrid()
         {
+            Items.Clear();
             dgReservacion.Items.Clear();
             dgReservacion.Items.Refresh();
             comboxServicioR.SelectedIndex = -1;
@@ -231,8 +229,6 @@ namespace TourSS_UI
         /// <summary>
         /// Limpia los datos del datagrid y groupbox
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void BtnLimpiarGrid_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show("Seguro que desea limpiar todos los campos?", "BORRAR TODO", MessageBoxButton.YesNo);
@@ -249,16 +245,15 @@ namespace TourSS_UI
         /// </summary>
         private void DgBtnBorrar_Click(object sender, RoutedEventArgs e)
         {
-            var selected = dgReservacion.SelectedItem as ReservacionModel;
+            var selected = dgReservacion.SelectedItem as ReservacionDetalle;
             ActualizarPrecios(null, selected);
             dgReservacion.Items.Remove(selected);
+            Items.Remove(selected);
         }
 
         /// <summary>
         /// Establece la cantidad maxima de unidades de servicios quedan disponibles (cupos disponibles)
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void QtyPicker_GotFocus(object sender, RoutedEventArgs e)
         {
             var item = comboxServicioR.SelectedItem as ServicioModel;
@@ -274,6 +269,16 @@ namespace TourSS_UI
         private void TxtClienteCodigo_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !IsTextAllowed(e.Text);
+        }
+
+        private void comboxClienteR_DropDownOpened(object sender, EventArgs e)
+        {
+           comboxClienteR.ItemsSource = clientes;
+        }
+
+        private void txtClienteCodigo_GotFocus(object sender, RoutedEventArgs e)
+        {
+            txtClienteCodigo.Text = "";
         }
     }
 }

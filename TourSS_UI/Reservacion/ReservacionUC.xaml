@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:TourSS_UI"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             mc:Ignorable="d" 
+             mc:Ignorable="d" FontFamily="Roboto"
              Height="500" Width="970">
     <Grid Background="White">
 
@@ -31,20 +31,20 @@
 
             <StackPanel Grid.Row="0" Height="50" VerticalAlignment="Bottom" Orientation="Horizontal">
                 <TextBlock Text="Código de Cliente:" VerticalAlignment="Center" FontWeight="Bold" FontSize="14" Margin="10 0 0 0"/>
-                <xctk:WatermarkTextBox x:Name="txtClienteCodigo" Width="105" Height="30" Watermark="Codigo ###" VerticalAlignment="Center" Margin="10 0 5 0" 
+                <xctk:WatermarkTextBox x:Name="txtClienteCodigo" Width="80" Height="30" Watermark="###" VerticalAlignment="Center" Margin="10 0 5 0" 
                                         ToolTip="Ingrese el codigo del cliente y presione ENTER" KeyDown="TxtClienteCodigo_KeyDown" FontSize="14"
-                                       PreviewTextInput="TxtClienteCodigo_PreviewTextInput"/>
+                                       PreviewTextInput="TxtClienteCodigo_PreviewTextInput" GotFocus="txtClienteCodigo_GotFocus"/>
                 <!--<xctk:IntegerUpDown x:Name="clienteCodigo" FontSize="14" ToolTip="Ingrese el codigo del cliente y presione ENTER" AllowTextInput="False"
                                         Height="30" VerticalAlignment="Center" Margin="10 0" Minimum="1" Width="100" KeyDown="TxtClienteCodigo_KeyDown" />-->
             </StackPanel>
             <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Right" Width="550">
-                <ComboBox  x:Name="comboxClienteR"  Width="300" ItemsSource="{Binding}" Margin="0 0 0 0" FontSize="14" 
+                <ComboBox  x:Name="comboxClienteR"  Width="300" ItemsSource="{Binding}" Margin="0 0 0 0" FontSize="14"
                            materialDesign:HintAssist.Hint="Seleccionar Cliente" DisplayMemberPath="ClienteInfo" SelectedValuePath="ID" 
-                           SelectionChanged="ComboxClienteR_SelectionChanged" />
+                           SelectionChanged="ComboxClienteR_SelectionChanged" DropDownOpened="comboxClienteR_DropDownOpened" />
 
                 <TextBlock Text="Fecha: " Height="20" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Margin="50 0 0 0"/>
                 <DatePicker x:Name="dateReservacion" Width="90" FontSize="14" IsDropDownOpen="False" FirstDayOfWeek="Monday"
-                                SelectedDateFormat="Short" Focusable="False" IsEnabled="False" VerticalAlignment="Top" Margin="5 10"/>
+                                SelectedDateFormat="Short" Focusable="False" IsEnabled="False" VerticalAlignment="Center" Margin="10 0"/>
             </StackPanel>
 
             <Grid Grid.Row="1">
@@ -92,21 +92,21 @@
             </Grid.ColumnDefinitions>
 
             <DataGrid Grid.Column="0" x:Name="dgReservacion" Margin="10 0 0 0" AlternatingRowBackground="LightGray"
-                      IsReadOnly="True" AutoGenerateColumns="False" ItemsSource="{Binding}" FontSize="14">
+                      IsReadOnly="True" AutoGenerateColumns="False" ItemsSource="{Binding}" FontSize="13" materialDesign:DataGridAssist.ColumnHeaderPadding="5">
                 <DataGrid.Columns>
                     
-                    <DataGridTextColumn Header="Descripcion" Binding="{Binding Path=Servicio.Descripcion}"/>
-                    <DataGridTextColumn Header="Precio Unidad" Binding="{Binding Path=Servicio.PrecioFormatted}" />
+                    <DataGridTextColumn Header="Descripcion" Binding="{Binding Path=Servicio.Descripcion}" x:Name="dgDescripcion"/>
+                    <DataGridTextColumn Header="Precio Unidad" Binding="{Binding Path=Servicio.Precio, StringFormat={}{0:C2}}" x:Name="dgPrecio"/>
                     <DataGridTextColumn Header="Cantidad" Binding="{Binding Path=Cantidad}"/>
-                    <DataGridTextColumn Header="Subtotal" Binding="{Binding Path=SubtotalFormatted}"/>
+                    <DataGridTextColumn Header="Subtotal (RD$)" Binding="{Binding Path=Subtotal, StringFormat={}{0:C2}}"/>
                     <!--<DataGridTextColumn Header="Itbis" Binding="{Binding Path=ItbisFormatted}"/>
                     <DataGridTextColumn Header="Total" Binding="{Binding Path=TotalFormatted}"/>-->
-                    <DataGridTextColumn Header="Fecha" Binding="{Binding Path=Servicio.RangoFecha}"/>
+                    <DataGridTextColumn Header="Fecha Disp." Binding="{Binding Path=Servicio.RangoFecha}" x:Name="dgFechas"/>
                     <DataGridTemplateColumn>
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Button x:Name="dgBtnBorrar" Height="25" Width="40" FontSize="10" materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                                        Click="DgBtnBorrar_Click">
+                                <Button x:Name="dgBtnBorrar" Height="25" Width="35" FontSize="10" materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                                        Click="DgBtnBorrar_Click" Padding="0">
                                     <materialDesign:PackIcon Kind="Delete" HorizontalAlignment="Center"/>
                                 </Button>
                             </DataTemplate>

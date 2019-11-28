@@ -1,0 +1,65 @@
+﻿<Window x:Class="TourSS_UI.Reservacion.Factura"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:local="clr-namespace:TourSS_UI.Reservacion"
+        mc:Ignorable="d"
+        Title="Factura" Height="450" Width="520" ResizeMode="NoResize">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="70"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBlock Text="Reservacion #0" x:Name="txtNuevaFactura" FontSize="20" FontWeight="DemiBold" Margin="10"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <Label Content="Empleado:" FontWeight="Black"/>
+            <Label x:Name="lbUser" Content="GETUSER"/>
+            <Label Content="Cliente:" FontWeight="Black" Margin="10 0 0 0"/>
+            <Label x:Name="lbCliente" Content="GETUSER"/>
+            <Label Content="Fecha:" FontWeight="Black" Margin="50 0 10 0"/>
+            <DatePicker Name="datePicker" Width="90" SelectedDateFormat="Short" IsEnabled="False"/>
+        </StackPanel>
+
+        <DataGrid Name="dgNuevaFactura" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeColumns="False"
+                  Grid.Row="2" AutoGenerateColumns="False" FontSize="14">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="#" Binding="{Binding Path=Numero}"/>
+                <DataGridTextColumn Header="Descripcion" Binding="{Binding Path=Descripcion}"/>
+                <DataGridTextColumn Header="Subtotal" Binding="{Binding Path= Factura.Subtotal, StringFormat={}{0:C2}}"/>
+                <DataGridTextColumn Header="Itbis" Binding="{Binding Path=Factura.Itbis, StringFormat={}{0:C2}}"/>
+                <DataGridTextColumn Header="Total" Binding="{Binding Path=Total, StringFormat={}{0:C2}}"/>
+            </DataGrid.Columns>
+
+        </DataGrid>
+
+        <StackPanel Grid.Row="3" Margin="0 0 0 0" Width="500" Background="#f4f4f4" Height="30" VerticalAlignment="Top"
+                    >
+            <StackPanel Orientation="Horizontal" Height="30" Margin ="300 0 0 0">
+                <TextBlock Text="TOTAL = " FontSize="16" FontWeight="Bold" VerticalAlignment="Center"/>
+                <Label Name="lbTotal" Content="$0.00" FontSize="16" VerticalAlignment="Center" FontWeight="DemiBold"/>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel>
+
+        </StackPanel>
+        <Button Grid.Row="4" Width="50" Height="40" Padding="0" HorizontalAlignment="Center" Background="SlateBlue"
+                Foreground="#fff" ToolTip="CONFIRMAR E IMPRIMIR COMPRA" x:Name="btnConfirmar" Click="btnConfirmar_Click">
+            <materialDesign:PackIcon Kind="ContentSaveOutline" Height="25" Width="25"/>
+        </Button>
+
+        <Button Grid.Row="4" Width="auto" Height="40" Padding="10" HorizontalAlignment="Right" Background="SlateBlue"
+                Foreground="#fff" ToolTip="CANCELAR COMPRA" Content="CANCELAR" Margin="100 0" x:Name="btnCancelar" Click="btnCancelar_Click">
+        </Button>
+
+
+    </Grid>
+</Window>

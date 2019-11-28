@@ -9,15 +9,10 @@ namespace TourSSLib.Models
 {
     public class Credencial
     {
-        public long ID { get; set; }
+        public long credencialID { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public long UsuarioID { get; set; }
-
-        public Credencial()
-        {
-
-        }
                                           
     }
 }
